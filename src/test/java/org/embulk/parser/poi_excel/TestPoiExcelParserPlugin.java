@@ -140,6 +140,8 @@ public class TestPoiExcelParserPlugin {
 			parser.addColumn("sheet", "string").set("value_type", "sheet_name");
 			parser.addColumn("row", "long").set("value_type", "row_number");
 			parser.addColumn("flag", "boolean");
+			parser.addColumn("col-n", "long").set("value_type", "column_number");
+			parser.addColumn("col-s", "string").set("value_type", "column_number");
 
 			URL inFile = getClass().getResource("test1.xls");
 			List<OutputRecord> result = tester.runParser(inFile, parser);
@@ -161,6 +163,8 @@ public class TestPoiExcelParserPlugin {
 		assertThat(r.getAsString("sheet"), is(sheetName));
 		assertThat(r.getAsLong("row"), is((long) (index + 2)));
 		assertThat(r.getAsBoolean("flag"), is(b));
+		assertThat(r.getAsLong("col-n"), is(1L));
+		assertThat(r.getAsString("col-s"), is("A"));
 	}
 
 	@Test

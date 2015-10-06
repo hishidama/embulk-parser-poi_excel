@@ -13,6 +13,8 @@ public enum PoiExcelColumnValueType {
 	SHEET_NAME(false, false),
 	/** row number (1 origin) */
 	ROW_NUMBER(false, false),
+	/** column number (1 origin) */
+	COLUMN_NUMBER(true, false),
 
 	//
 	;
