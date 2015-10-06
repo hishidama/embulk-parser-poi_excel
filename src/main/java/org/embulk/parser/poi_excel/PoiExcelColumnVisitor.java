@@ -504,7 +504,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			visitCellValueError(column, option, cell, cell.getErrorCellValue(), visitor);
 			return;
 		default:
-			throw new UnsupportedOperationException(MessageFormat.format("unsupported POI cellType={0}", cellType));
+			throw new IllegalStateException(MessageFormat.format("unsupported POI cellType={0}", cellType));
 		}
 	}
 
@@ -610,7 +610,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			return;
 		case Cell.CELL_TYPE_FORMULA:
 		default:
-			throw new UnsupportedOperationException(MessageFormat.format("unsupported POI cellType={0}", cellType));
+			throw new IllegalStateException(MessageFormat.format("unsupported POI cellType={0}", cellType));
 		}
 	}
 
@@ -812,7 +812,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			rgb[1] = b[1] & 0xff;
 			rgb[2] = b[2] & 0xff;
 		} else {
-			throw new UnsupportedOperationException(MessageFormat.format("unsupported POI color={0}", color));
+			throw new IllegalStateException(MessageFormat.format("unsupported POI color={0}", color));
 		}
 
 		if (column.getType() instanceof StringType) {
