@@ -163,7 +163,7 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		final int flushCount = task.getFlushCount();
 
 		try (final PageBuilder pageBuilder = new PageBuilder(Exec.getBufferAllocator(), schema, output)) {
-			PoiExcelColumnVisitor visitor = new PoiExcelColumnVisitor(task, sheet, pageBuilder);
+			PoiExcelColumnVisitor visitor = newPoiExcelColumnVisitor(task, sheet, pageBuilder);
 
 			int count = 0;
 			for (final Row row : sheet) {
@@ -182,5 +182,9 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 			}
 			pageBuilder.finish();
 		}
+	}
+
+	protected PoiExcelColumnVisitor newPoiExcelColumnVisitor(PluginTask task, Sheet sheet, PageBuilder pageBuilder) {
+		return new PoiExcelColumnVisitor(task, sheet, pageBuilder);
 	}
 }
