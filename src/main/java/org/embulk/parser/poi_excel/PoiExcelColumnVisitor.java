@@ -402,7 +402,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 
 		@Override
 		public void visitCellValueBoolean(Column column, Object cell, boolean value) {
-			throw new UnsupportedOperationException("unsupported conversion boolean to timestamp.");
+			throw new UnsupportedOperationException("unsupported conversion Excel boolean to Embulk timestamp.");
 		}
 
 		@Override
@@ -412,12 +412,12 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 
 		@Override
 		public void visitRowNumber(Column column, int index1) {
-			throw new UnsupportedOperationException("unsupported conversion row_number to timestamp.");
+			throw new UnsupportedOperationException("unsupported conversion row_number to Embulk timestamp.");
 		}
 
 		@Override
 		public void visitColumnNumber(Column column, int index1) {
-			throw new UnsupportedOperationException("unsupported conversion column_number to timestamp.");
+			throw new UnsupportedOperationException("unsupported conversion column_number to Embulk timestamp.");
 		}
 	};
 
@@ -467,7 +467,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			visitCellComment(column, option, cell, visitor);
 			return;
 		default:
-			throw new UnsupportedOperationException(MessageFormat.format("unsupported valueType={0}", valueType));
+			throw new UnsupportedOperationException(MessageFormat.format("unsupported value_type={0}", valueType));
 		}
 	}
 
@@ -504,7 +504,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			visitCellValueError(column, option, cell, cell.getErrorCellValue(), visitor);
 			return;
 		default:
-			throw new UnsupportedOperationException(MessageFormat.format("unsupported cellType={0}", cellType));
+			throw new UnsupportedOperationException(MessageFormat.format("unsupported POI cellType={0}", cellType));
 		}
 	}
 
@@ -610,7 +610,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			return;
 		case Cell.CELL_TYPE_FORMULA:
 		default:
-			throw new UnsupportedOperationException(MessageFormat.format("unsupported cellType={0}", cellType));
+			throw new UnsupportedOperationException(MessageFormat.format("unsupported POI cellType={0}", cellType));
 		}
 	}
 
@@ -812,7 +812,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			rgb[1] = b[1] & 0xff;
 			rgb[2] = b[2] & 0xff;
 		} else {
-			throw new UnsupportedOperationException(MessageFormat.format("unsupported color={0}", color));
+			throw new UnsupportedOperationException(MessageFormat.format("unsupported POI color={0}", color));
 		}
 
 		if (column.getType() instanceof StringType) {
