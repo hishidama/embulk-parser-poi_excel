@@ -148,6 +148,103 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		return timestampParsers[column.getIndex()];
 	}
 
+	private CellVisitor booleanVisitor;
+
+	@Override
+	public final void booleanColumn(Column column) {
+		if (booleanVisitor == null) {
+			booleanVisitor = newBooleanCellVisitor();
+		}
+		visitCell0(column, booleanVisitor);
+	}
+
+	protected CellVisitor newBooleanCellVisitor() {
+		return new BooleanCellVisitor();
+	}
+
+	private CellVisitor longVisitor;
+
+	@Override
+	public final void longColumn(Column column) {
+		if (longVisitor == null) {
+			longVisitor = newLongCellVisitor();
+		}
+		visitCell0(column, longVisitor);
+	}
+
+	protected CellVisitor newLongCellVisitor() {
+		return new LongCellVisitor();
+	}
+
+	private CellVisitor doubleVisitor;
+
+	@Override
+	public final void doubleColumn(Column column) {
+		if (doubleVisitor == null) {
+			doubleVisitor = newDoubleCellVisitor();
+		}
+		visitCell0(column, doubleVisitor);
+	}
+
+	protected CellVisitor newDoubleCellVisitor() {
+		return new DoubleCellVisitor();
+	}
+
+	private CellVisitor stringVisitor;
+
+	@Override
+	public final void stringColumn(Column column) {
+		if (stringVisitor == null) {
+			stringVisitor = newStringCellVisitor();
+		}
+		visitCell0(column, stringVisitor);
+	}
+
+	protected CellVisitor newStringCellVisitor() {
+		return new StringCellVisitor();
+	}
+
+	private CellVisitor timestampVisitor;
+
+	@Override
+	public final void timestampColumn(Column column) {
+		if (timestampVisitor == null) {
+			timestampVisitor = newTimestampCellVisitor();
+		}
+		visitCell0(column, timestampVisitor);
+	}
+
+	protected CellVisitor newTimestampCellVisitor() {
+		return new TimestampCellVisitor();
+	}
+
+	protected abstract class CellVisitor {
+
+		public abstract void visitCellValueNumeric(Column column, Object cell, double value);
+
+		public abstract void visitCellValueString(Column column, Object cell, String value);
+
+		public void visitCellValueBlank(Column column, Object cell) {
+			pageBuilder.setNull(column);
+		}
+
+		public abstract void visitCellValueBoolean(Column column, Object cell, boolean value);
+
+		public abstract void visitCellValueError(Column column, Object cell, int code);
+
+		public void visitCellFormula(Column column, Cell cell) {
+			pageBuilder.setString(column, cell.getCellFormula());
+		}
+
+		public void visitSheetName(Column column, String sheetName) {
+			pageBuilder.setString(column, sheetName);
+		}
+
+		public abstract void visitRowNumber(Column column, int index1);
+
+		public abstract void visitColumnNumber(Column column, int index1);
+	}
+
 	protected class BooleanCellVisitor extends CellVisitor {
 
 		@Override
@@ -180,16 +277,6 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			pageBuilder.setBoolean(column, index1 != 0);
 		}
 	};
-
-	protected CellVisitor booleanVisitor;
-
-	@Override
-	public void booleanColumn(Column column) {
-		if (booleanVisitor == null) {
-			booleanVisitor = new BooleanCellVisitor();
-		}
-		visitCell0(column, booleanVisitor);
-	}
 
 	protected class LongCellVisitor extends CellVisitor {
 
@@ -224,16 +311,6 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		}
 	};
 
-	protected CellVisitor longVisitor;
-
-	@Override
-	public void longColumn(Column column) {
-		if (longVisitor == null) {
-			longVisitor = new LongCellVisitor();
-		}
-		visitCell0(column, longVisitor);
-	}
-
 	protected class DoubleCellVisitor extends CellVisitor {
 
 		@Override
@@ -266,16 +343,6 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			pageBuilder.setDouble(column, index1);
 		}
 	};
-
-	protected CellVisitor doubleVisitor;
-
-	@Override
-	public void doubleColumn(Column column) {
-		if (doubleVisitor == null) {
-			doubleVisitor = new DoubleCellVisitor();
-		}
-		visitCell0(column, doubleVisitor);
-	}
 
 	protected class StringCellVisitor extends CellVisitor {
 
@@ -317,16 +384,6 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		}
 	};
 
-	protected CellVisitor stringVisitor;
-
-	@Override
-	public void stringColumn(Column column) {
-		if (stringVisitor == null) {
-			stringVisitor = new StringCellVisitor();
-		}
-		visitCell0(column, stringVisitor);
-	}
-
 	protected class TimestampCellVisitor extends CellVisitor {
 
 		@Override
@@ -363,43 +420,6 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			throw new UnsupportedOperationException("unsupported conversion column_number to timestamp.");
 		}
 	};
-
-	protected CellVisitor timestampVisitor;
-
-	@Override
-	public void timestampColumn(Column column) {
-		if (timestampVisitor == null) {
-			timestampVisitor = new TimestampCellVisitor();
-		}
-		visitCell0(column, timestampVisitor);
-	}
-
-	protected abstract class CellVisitor {
-
-		public abstract void visitCellValueNumeric(Column column, Object cell, double value);
-
-		public abstract void visitCellValueString(Column column, Object cell, String value);
-
-		public void visitCellValueBlank(Column column, Object cell) {
-			pageBuilder.setNull(column);
-		}
-
-		public abstract void visitCellValueBoolean(Column column, Object cell, boolean value);
-
-		public abstract void visitCellValueError(Column column, Object cell, int code);
-
-		public void visitCellFormula(Column column, Cell cell) {
-			pageBuilder.setString(column, cell.getCellFormula());
-		}
-
-		public void visitSheetName(Column column, String sheetName) {
-			pageBuilder.setString(column, sheetName);
-		}
-
-		public abstract void visitRowNumber(Column column, int index1);
-
-		public abstract void visitColumnNumber(Column column, int index1);
-	}
 
 	protected final void visitCell0(Column column, CellVisitor visitor) {
 		try {
