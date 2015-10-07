@@ -144,7 +144,7 @@ public class PoiExcelColumnIndex {
 
 	protected void checkIndex(Column column, int index) {
 		if (index < 0) {
-			throw new RuntimeException(MessageFormat.format("column_number out of range. {0}", column));
+			throw new RuntimeException(MessageFormat.format("column_number out of range at {0}", column));
 		}
 	}
 
@@ -159,10 +159,10 @@ public class PoiExcelColumnIndex {
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(
-					MessageFormat.format("illegal column_number=\"{0}\". {1}", columnNumber, column), e);
+					MessageFormat.format("illegal column_number=\"{0}\" at {1}", columnNumber, column), e);
 		}
 		if (index < 0) {
-			throw new RuntimeException(MessageFormat.format("illegal column_number=\"{0}\". {1}", columnNumber, column));
+			throw new RuntimeException(MessageFormat.format("illegal column_number=\"{0}\" at {1}", columnNumber, column));
 		}
 		return index;
 	}

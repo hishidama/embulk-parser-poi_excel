@@ -401,9 +401,10 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		try {
 			visitCell(column, visitor);
 		} catch (Exception e) {
-			throw new RuntimeException(MessageFormat.format("error {0} cell={1}!{2}. {3}", column,
-					sheet.getSheetName(), new CellReference(currentRow.getRowNum(), getColumnOption(column)
-							.getColumnIndex()).formatAsString(), e.getMessage()), e);
+			throw new RuntimeException(MessageFormat.format("error at {0} cell={1}!{2}. {3}", column, sheet
+					.getSheetName(),
+					new CellReference(currentRow.getRowNum(), getColumnOption(column).getColumnIndex())
+							.formatAsString(), e.getMessage()), e);
 		}
 	}
 
