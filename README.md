@@ -19,7 +19,7 @@ This plugin uses Apache POI.
 * **name**: Embulk column name. (string, required)
 * **type**: Embulk column type. (string, required)
 * **value_type**: value type. see below. (string, defualt: `cell_value`)
-* **column_number**: Excel column number. `A`,`B`,`C`,... or number(1 origin). (string, default: next column)
+* **column_number**: Excel column number. see below. (string, default: next column)
 
 ### value_type
 
@@ -27,6 +27,14 @@ This plugin uses Apache POI.
 * **cell_formula**: formula in cell. (if cell is not formula, same `cell_value`.)
 * **sheet_name**: sheet name.
 * **row_number**: row number(1 origin).
+
+### column_number
+
+* `A`,`B`,`C`,...: column number of "A1 format".
+* number: column number (1 origin).
+* `+`: next column.
+* `-`: previous column.
+* `=`: same column.
 
 
 ## Example

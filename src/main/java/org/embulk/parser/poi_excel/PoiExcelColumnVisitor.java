@@ -88,17 +88,37 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 				Optional<String> numberOption = option.getColumnNumber();
 				if (numberOption.isPresent()) {
 					String s = numberOption.get();
-					index = convertColumnIndex(s);
-					option.setColumnIndex(index);
+					switch (s) {
+					case "=":
+						break;
+					case "+":
+						if (index < 0) {
+							index = 0;
+						}
+						index++;
+						break;
+					case "-":
+						if (index < 0) {
+							index = 0;
+						}
+						if (--index < 0) {
+							throw new RuntimeException(MessageFormat.format("column_number out of range. {0}", column));
+						}
+						break;
+					default:
+						index = convertColumnIndex(s);
+						break;
+					}
 				} else {
 					if (valueType.nextIndex()) {
 						index++;
 					}
-					if (index < 0) {
-						index = 0;
-					}
-					option.setColumnIndex(index);
 				}
+
+				if (index < 0) {
+					index = 0;
+				}
+				option.setColumnIndex(index);
 			}
 		}
 	}
@@ -113,10 +133,10 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 				index = CellReference.convertColStringToIndex(s);
 			}
 		} catch (Exception e) {
-			throw new RuntimeException(MessageFormat.format("illegal column_index={0}", s), e);
+			throw new RuntimeException(MessageFormat.format("illegal column_number=\"{0}\"", s), e);
 		}
 		if (index < 0) {
-			throw new RuntimeException(MessageFormat.format("illegal column_index={0}", s));
+			throw new RuntimeException(MessageFormat.format("illegal column_number=\"{0}\"", s));
 		}
 		return index;
 	}

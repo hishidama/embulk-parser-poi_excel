@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.TimeZone;
 
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.FormulaError;
 import org.embulk.config.ConfigSource;
 import org.embulk.parser.EmbulkPluginTester;
 import org.embulk.parser.EmbulkTestOutputPlugin.OutputRecord;
@@ -68,64 +67,6 @@ public class TestPoiExcelParserPlugin {
 		assertThat(r.getAsDouble("double"), is(d));
 		assertThat(r.getAsString("string"), is(s));
 		assertThat(r.getAsTimestamp("timestamp"), is(timestamp));
-	}
-
-	@Test
-	public void testColumnNumber_string() throws ParseException {
-		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
-			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
-
-			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
-			parser.set("sheet", "test1");
-			parser.set("skip_header_lines", 1);
-			parser.set("cell_error_null", false);
-			parser.addColumn("text", "string").set("column_number", "D");
-
-			URL inFile = getClass().getResource("test1.xls");
-			List<OutputRecord> result = tester.runParser(inFile, parser);
-
-			assertThat(result.size(), is(7));
-			assertThat(result.get(0).getAsString("text"), is("abc"));
-			assertThat(result.get(1).getAsString("text"), is("def"));
-			assertThat(result.get(2).getAsString("text"), is("456"));
-			assertThat(result.get(3).getAsString("text"), is("abc"));
-			assertThat(result.get(4).getAsString("text"), is("abc"));
-			assertThat(result.get(5).getAsString("text"), is("true"));
-			assertThat(result.get(6).getAsString("text"), is("#DIV/0!"));
-		}
-	}
-
-	@Test
-	public void testColumnNumber_int() throws ParseException {
-		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
-			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
-
-			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
-			parser.set("sheet", "test1");
-			parser.set("skip_header_lines", 1);
-			parser.set("cell_error_null", false);
-			parser.addColumn("long", "long").set("column_number", 2);
-			parser.addColumn("double", "double");
-
-			URL inFile = getClass().getResource("test1.xls");
-			List<OutputRecord> result = tester.runParser(inFile, parser);
-
-			assertThat(result.size(), is(7));
-			check3(result, 0, 123L, 123.4d);
-			check3(result, 1, 456L, 456.7d);
-			check3(result, 2, 123L, 123d);
-			check3(result, 3, 123L, 123.4d);
-			check3(result, 4, 123L, 123.4d);
-			check3(result, 5, 1L, 1d);
-			check3(result, 6, (long) FormulaError.DIV0.getCode(), (double) FormulaError.DIV0.getCode());
-		}
-	}
-
-	private void check3(List<OutputRecord> result, int index, Long l, Double d) throws ParseException {
-		OutputRecord r = result.get(index);
-		// System.out.println(r);
-		assertThat(r.getAsLong("long"), is(l));
-		assertThat(r.getAsDouble("double"), is(d));
 	}
 
 	@Test
