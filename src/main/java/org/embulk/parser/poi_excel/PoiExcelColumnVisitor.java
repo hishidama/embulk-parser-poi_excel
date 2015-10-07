@@ -256,9 +256,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			pageBuilder.setString(column, cell.getCellFormula());
 		}
 
-		public void visitSheetName(Column column, String sheetName) {
-			pageBuilder.setString(column, sheetName);
-		}
+		public abstract void visitSheetName(Column column);
 
 		public abstract void visitRowNumber(Column column, int index1);
 
@@ -285,6 +283,12 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		@Override
 		public void visitCellValueError(Column column, Object cell, int code) {
 			pageBuilder.setNull(column);
+		}
+
+		@Override
+		public void visitSheetName(Column column) {
+			int index = sheet.getWorkbook().getSheetIndex(sheet);
+			pageBuilder.setBoolean(column, index != 0);
 		}
 
 		@Override
@@ -321,6 +325,12 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		}
 
 		@Override
+		public void visitSheetName(Column column) {
+			int index = sheet.getWorkbook().getSheetIndex(sheet);
+			pageBuilder.setLong(column, index);
+		}
+
+		@Override
 		public void visitRowNumber(Column column, int index1) {
 			pageBuilder.setLong(column, index1);
 		}
@@ -351,6 +361,12 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		@Override
 		public void visitCellValueError(Column column, Object cell, int code) {
 			pageBuilder.setDouble(column, code);
+		}
+
+		@Override
+		public void visitSheetName(Column column) {
+			int index = sheet.getWorkbook().getSheetIndex(sheet);
+			pageBuilder.setDouble(column, index);
 		}
 
 		@Override
@@ -393,6 +409,11 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		}
 
 		@Override
+		public void visitSheetName(Column column) {
+			pageBuilder.setString(column, sheet.getSheetName());
+		}
+
+		@Override
 		public void visitRowNumber(Column column, int index1) {
 			pageBuilder.setString(column, Integer.toString(index1));
 		}
@@ -431,6 +452,11 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		}
 
 		@Override
+		public void visitSheetName(Column column) {
+			throw new UnsupportedOperationException("unsupported conversion sheet_name to Embulk timestamp.");
+		}
+
+		@Override
 		public void visitRowNumber(Column column, int index1) {
 			throw new UnsupportedOperationException("unsupported conversion row_number to Embulk timestamp.");
 		}
@@ -457,7 +483,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 
 		switch (valueType) {
 		case SHEET_NAME:
-			visitor.visitSheetName(column, sheet.getSheetName());
+			visitor.visitSheetName(column);
 			return;
 		case ROW_NUMBER:
 			visitor.visitRowNumber(column, currentRow.getRowNum() + 1);

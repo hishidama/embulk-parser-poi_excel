@@ -79,6 +79,7 @@ public class TestPoiExcelParserPlugin {
 			parser.set("skip_header_lines", 1);
 			parser.set("cell_error_null", false);
 			parser.addColumn("sheet", "string").set("value_type", "sheet_name");
+			parser.addColumn("sheet-n", "long").set("value_type", "sheet_name");
 			parser.addColumn("row", "long").set("value_type", "row_number");
 			parser.addColumn("flag", "boolean");
 			parser.addColumn("col-n", "long").set("value_type", "column_number");
@@ -102,6 +103,7 @@ public class TestPoiExcelParserPlugin {
 		OutputRecord r = result.get(index);
 		// System.out.println(r);
 		assertThat(r.getAsString("sheet"), is(sheetName));
+		assertThat(r.getAsLong("sheet-n"), is(0L));
 		assertThat(r.getAsLong("row"), is((long) (index + 2)));
 		assertThat(r.getAsBoolean("flag"), is(b));
 		assertThat(r.getAsLong("col-n"), is(1L));
