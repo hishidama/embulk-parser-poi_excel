@@ -33,8 +33,13 @@ This plugin uses Apache POI.
 * `A`,`B`,`C`,...: column number of "A1 format".
 * number: column number (1 origin).
 * `+`: next column.
+* `+`**name**: next column of name.
+* `+`**number**: number next column.
 * `-`: previous column.
+* `-`**name**: previous column of name.
+* `-`**number**: number previous column.
 * `=`: same column.
+* `=`**name**: same column of name.
 
 
 ## Example

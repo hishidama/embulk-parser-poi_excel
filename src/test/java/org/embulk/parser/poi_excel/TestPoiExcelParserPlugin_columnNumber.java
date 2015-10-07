@@ -16,7 +16,7 @@ import org.junit.Test;
 public class TestPoiExcelParserPlugin_columnNumber {
 
 	@Test
-	public void testColumnNumber_string() throws ParseException {
+	public void testColumnNumber_string() throws Exception {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -41,7 +41,7 @@ public class TestPoiExcelParserPlugin_columnNumber {
 	}
 
 	@Test
-	public void testColumnNumber_int() throws ParseException {
+	public void testColumnNumber_int() throws Exception {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -74,7 +74,7 @@ public class TestPoiExcelParserPlugin_columnNumber {
 	}
 
 	@Test
-	public void testColumnNumber_move() throws ParseException {
+	public void testColumnNumber_move() throws Exception {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -109,5 +109,80 @@ public class TestPoiExcelParserPlugin_columnNumber {
 		assertThat(r.getAsLong("long3"), is(l));
 		assertThat(r.getAsDouble("double1"), is(d));
 		assertThat(r.getAsDouble("double2"), is(d));
+	}
+
+	@Test
+	public void testColumnNumber_move2() throws Exception {
+		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
+			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
+
+			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
+			parser.set("sheet", "test1");
+			parser.set("skip_header_lines", 1);
+			parser.addColumn("long1", "long").set("column_number", 2);
+			parser.addColumn("string1", "string").set("column_number", "+2");
+			parser.addColumn("long2", "long").set("column_number", "=long1");
+			parser.addColumn("string2", "string").set("column_number", "=string1");
+			parser.addColumn("long3", "long").set("column_number", "-2");
+
+			URL inFile = getClass().getResource("test1.xls");
+			List<OutputRecord> result = tester.runParser(inFile, parser);
+
+			assertThat(result.size(), is(7));
+			check_move2(result, 0, 123L, "abc");
+			check_move2(result, 1, 456L, "def");
+			check_move2(result, 2, 123L, "456");
+			check_move2(result, 3, 123L, "abc");
+			check_move2(result, 4, 123L, "abc");
+			check_move2(result, 5, 1L, "true");
+			check_move2(result, 6, null, null);
+		}
+	}
+
+	private void check_move2(List<OutputRecord> result, int index, Long l, String s) throws ParseException {
+		OutputRecord r = result.get(index);
+		// System.out.println(r);
+		assertThat(r.getAsLong("long1"), is(l));
+		assertThat(r.getAsLong("long2"), is(l));
+		assertThat(r.getAsLong("long3"), is(l));
+		assertThat(r.getAsString("string1"), is(s));
+		assertThat(r.getAsString("string2"), is(s));
+	}
+
+	@Test
+	public void testColumnNumber_moveName() throws Exception {
+		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
+			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
+
+			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
+			parser.set("sheet", "test1");
+			parser.set("skip_header_lines", 1);
+			parser.addColumn("long1", "long").set("column_number", 2);
+			parser.addColumn("double1", "double").set("column_number", "+long1");
+			parser.addColumn("long2", "long").set("column_number", "=long1");
+			parser.addColumn("boolean1", "boolean").set("column_number", "-long1");
+
+			URL inFile = getClass().getResource("test1.xls");
+			List<OutputRecord> result = tester.runParser(inFile, parser);
+
+			assertThat(result.size(), is(7));
+			check_moveName(result, 0, true, 123L, 123.4d);
+			check_moveName(result, 1, false, 456L, 456.7d);
+			check_moveName(result, 2, false, 123L, 123d);
+			check_moveName(result, 3, true, 123L, 123.4d);
+			check_moveName(result, 4, true, 123L, 123.4d);
+			check_moveName(result, 5, true, 1L, 1d);
+			check_moveName(result, 6, null, null, null);
+		}
+	}
+
+	private void check_moveName(List<OutputRecord> result, int index, Boolean b, Long l, Double d)
+			throws ParseException {
+		OutputRecord r = result.get(index);
+		// System.out.println(r);
+		assertThat(r.getAsLong("long1"), is(l));
+		assertThat(r.getAsLong("long2"), is(l));
+		assertThat(r.getAsDouble("double1"), is(d));
+		assertThat(r.getAsBoolean("boolean1"), is(b));
 	}
 }

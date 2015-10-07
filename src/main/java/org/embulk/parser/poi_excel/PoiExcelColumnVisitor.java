@@ -36,7 +36,6 @@ import org.embulk.spi.ColumnConfig;
 import org.embulk.spi.ColumnVisitor;
 import org.embulk.spi.Exec;
 import org.embulk.spi.PageBuilder;
-import org.embulk.spi.Schema;
 import org.embulk.spi.SchemaConfig;
 import org.embulk.spi.time.Timestamp;
 import org.embulk.spi.time.TimestampParser;
@@ -65,89 +64,20 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 	}
 
 	protected void initializeColumnOptions() {
-		int index = -1;
-
-		Schema schema = task.getColumns().toSchema();
-		for (Column column : schema.getColumns()) {
-			ColumnOptionTask option = getColumnOption(column);
-
-			PoiExcelColumnValueType valueType;
-			if (option.getCellStyleName().isPresent()) {
-				valueType = PoiExcelColumnValueType.CELL_STYLE;
-			} else {
-				String type = option.getValueType();
-				try {
-					valueType = PoiExcelColumnValueType.valueOf(type.toUpperCase());
-				} catch (Exception e) {
-					throw new RuntimeException(MessageFormat.format("illegal value_type={0}", type));
-				}
-			}
-			option.setValueTypeEnum(valueType);
-
-			if (valueType.useCell()) {
-				Optional<String> numberOption = option.getColumnNumber();
-				if (numberOption.isPresent()) {
-					String s = numberOption.get();
-					switch (s) {
-					case "=":
-						break;
-					case "+":
-						if (index < 0) {
-							index = 0;
-						}
-						index++;
-						break;
-					case "-":
-						if (index < 0) {
-							index = 0;
-						}
-						if (--index < 0) {
-							throw new RuntimeException(MessageFormat.format("column_number out of range. {0}", column));
-						}
-						break;
-					default:
-						index = convertColumnIndex(s);
-						break;
-					}
-				} else {
-					if (valueType.nextIndex()) {
-						index++;
-					}
-				}
-
-				if (index < 0) {
-					index = 0;
-				}
-				option.setColumnIndex(index);
-			}
-		}
-	}
-
-	protected int convertColumnIndex(String s) {
-		int index;
-		try {
-			char c = s.charAt(0);
-			if ('0' <= c && c <= '9') {
-				index = Integer.parseInt(s) - 1;
-			} else {
-				index = CellReference.convertColStringToIndex(s);
-			}
-		} catch (Exception e) {
-			throw new RuntimeException(MessageFormat.format("illegal column_number=\"{0}\"", s), e);
-		}
-		if (index < 0) {
-			throw new RuntimeException(MessageFormat.format("illegal column_number=\"{0}\"", s));
-		}
-		return index;
+		new PoiExcelColumnIndex().initializeColumnIndex(task, getColumnOptions());
 	}
 
 	public void setRow(Row row) {
 		this.currentRow = row;
 	}
 
+	protected ColumnOptionTask getColumnOption(Column column) {
+		return getColumnOptions().get(column.getIndex());
+	}
+
 	private List<ColumnOptionTask> columnOptions;
 
-	protected ColumnOptionTask getColumnOption(Column column) {
+	protected List<ColumnOptionTask> getColumnOptions() {
 		if (columnOptions == null) {
 			SchemaConfig schemaConfig = task.getColumns();
 			columnOptions = new ArrayList<>(schemaConfig.getColumnCount());
@@ -156,7 +86,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 				columnOptions.add(option);
 			}
 		}
-		return columnOptions.get(column.getIndex());
+		return columnOptions;
 	}
 
 	private TimestampParser[] timestampParsers;
