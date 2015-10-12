@@ -28,7 +28,7 @@ public class TestPoiExcelParserPlugin_cellComment {
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(2));
-			check1(result, 0, "hishidama", "hishidama:\nコメント");
+			check1(result, 0, "hishidama", "hishidama:\nmy comment");
 			check1(result, 1, null, null);
 		}
 	}
