@@ -1,4 +1,4 @@
-package org.embulk.parser.poi_excel;
+package org.embulk.parser.poi_excel.visitor;
 
 import java.text.MessageFormat;
 import java.util.LinkedHashMap;
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.poi.ss.util.CellReference;
+import org.embulk.parser.poi_excel.PoiExcelColumnValueType;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.PluginTask;
 import org.embulk.spi.Column;
@@ -27,12 +28,13 @@ public class PoiExcelColumnIndex {
 		Schema schema = task.getColumns().toSchema();
 		for (Column column : schema.getColumns()) {
 			ColumnOptionTask option = columnOptions.get(column.getIndex());
+			String type = option.getValueType();
 
 			PoiExcelColumnValueType valueType;
-			if (option.getCellStyleName().isPresent()) {
+			if (option.getCellStyleName().isPresent()
+					&& PoiExcelColumnValueType.CELL_VALUE.name().equalsIgnoreCase(type)) {
 				valueType = PoiExcelColumnValueType.CELL_STYLE;
 			} else {
-				String type = option.getValueType();
 				try {
 					valueType = PoiExcelColumnValueType.valueOf(type.toUpperCase());
 				} catch (Exception e) {
@@ -158,11 +160,12 @@ public class PoiExcelColumnIndex {
 				index = CellReference.convertColStringToIndex(columnNumber);
 			}
 		} catch (Exception e) {
-			throw new RuntimeException(
-					MessageFormat.format("illegal column_number=\"{0}\" at {1}", columnNumber, column), e);
+			throw new RuntimeException(MessageFormat.format("illegal column_number=\"{0}\" at {1}", columnNumber,
+					column), e);
 		}
 		if (index < 0) {
-			throw new RuntimeException(MessageFormat.format("illegal column_number=\"{0}\" at {1}", columnNumber, column));
+			throw new RuntimeException(MessageFormat.format("illegal column_number=\"{0}\" at {1}", columnNumber,
+					column));
 		}
 		return index;
 	}

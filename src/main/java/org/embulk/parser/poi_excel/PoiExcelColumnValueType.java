@@ -7,6 +7,8 @@ public enum PoiExcelColumnValueType {
 	CELL_FORMULA(true, true),
 	/** cell style */
 	CELL_STYLE(true, false),
+	/** cell font */
+	CELL_FONT(true, false),
 	/** cell comment */
 	CELL_COMMENT(true, false),
 	/** sheet name */

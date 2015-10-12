@@ -203,8 +203,9 @@ public class TestPoiExcelParserPlugin {
 			parser.addColumn("border-left", "long").set("cell_style_name", "borderLeft");
 			parser.addColumn("border-right", "long").set("cell_style_name", "borderRight");
 			parser.addColumn("border-all", "long").set("cell_style_name", "border");
-			parser.addColumn("font-color", "long").set("column_number", "C").set("cell_style_name", "fontColor");
-			parser.addColumn("font-bold", "boolean").set("cell_style_name", "fontBold");
+			parser.addColumn("font-color", "long").set("column_number", "C").set("value_type", "cell_font")
+					.set("cell_style_name", "fontColor");
+			parser.addColumn("font-bold", "boolean").set("value_type", "cell_font").set("cell_style_name", "fontBold");
 
 			URL inFile = getClass().getResource("test1.xls");
 			List<OutputRecord> result = tester.runParser(inFile, parser);

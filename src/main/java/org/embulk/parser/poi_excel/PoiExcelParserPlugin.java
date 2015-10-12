@@ -14,6 +14,9 @@ import org.embulk.config.ConfigDefault;
 import org.embulk.config.ConfigSource;
 import org.embulk.config.Task;
 import org.embulk.config.TaskSource;
+import org.embulk.parser.poi_excel.visitor.PoiExcelColumnVisitor;
+import org.embulk.parser.poi_excel.visitor.PoiExcelVisitorFactory;
+import org.embulk.parser.poi_excel.visitor.PoiExcelVisitorValue;
 import org.embulk.spi.Exec;
 import org.embulk.spi.FileInput;
 import org.embulk.spi.PageBuilder;
@@ -163,7 +166,8 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		final int flushCount = task.getFlushCount();
 
 		try (final PageBuilder pageBuilder = new PageBuilder(Exec.getBufferAllocator(), schema, output)) {
-			PoiExcelColumnVisitor visitor = newPoiExcelColumnVisitor(task, sheet, pageBuilder);
+			PoiExcelVisitorFactory factory = newPoiExcelVisitorFactory(task, sheet, pageBuilder);
+			PoiExcelColumnVisitor visitor = factory.getPoiExcelColumnVisitor();
 
 			int count = 0;
 			for (final Row row : sheet) {
@@ -184,7 +188,8 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		}
 	}
 
-	protected PoiExcelColumnVisitor newPoiExcelColumnVisitor(PluginTask task, Sheet sheet, PageBuilder pageBuilder) {
-		return new PoiExcelColumnVisitor(task, sheet, pageBuilder);
+	protected PoiExcelVisitorFactory newPoiExcelVisitorFactory(PluginTask task, Sheet sheet, PageBuilder pageBuilder) {
+		PoiExcelVisitorValue visitorValue = new PoiExcelVisitorValue(task, sheet, pageBuilder);
+		return new PoiExcelVisitorFactory(visitorValue);
 	}
 }
