@@ -20,6 +20,7 @@ This plugin uses Apache POI.
 * **type**: Embulk column type. (string, required)
 * **value**: value type. see below. (string, defualt: `cell_value`)
 * **column_number**: Excel column number. see below. (string, default: next column)
+* **attribute_name**: use with value `cell_style`, `cell_font`, etc. see below. (list of string)
 
 ### value
 
@@ -35,20 +36,26 @@ This plugin uses Apache POI.
 ### column_number
 
 * `A`,`B`,`C`,...: column number of "A1 format".
-* number: column number (1 origin).
+* *number*: column number (1 origin).
 * `+`: next column.
-* `+`**name**: next column of name.
-* `+`**number**: number next column.
+* `+`*name*: next column of name.
+* `+`*number*: number next column.
 * `-`: previous column.
-* `-`**name**: previous column of name.
-* `-`**number**: number previous column.
+* `-`*name*: previous column of name.
+* `-`*number*: number previous column.
 * `=`: same column.
-* `=`**name**: same column of name.
+* `=`*name*: same column of name.
 
 ### attribute_name
 
-**value**がcell_style, cell_font, cell_commentのとき、デフォルトでは、全属性を取得してJSON文字列に変換します。  
+**value**が`cell_style`, `cell_font`, `cell_comment`のとき、デフォルトでは、全属性を取得してJSON文字列に変換します。  
 （JSON文字列を返すので、**type**は`string`である必要があります）
+
+```yaml
+    columns:
+    - {name: foo, type: string, column_number: A, value: cell_style}
+```
+
 
 attribute_nameを指定することで、指定された属性だけを取得してJSON文字列に変換します。
 
@@ -56,10 +63,11 @@ attribute_nameを指定することで、指定された属性だけを取得し
 
 ```yaml
     columns:
-    - {name: foo, type: string, value: cell_style, attribute_name: [border_top, border_bottom, border_left, border_right]}
+    - {name: foo, type: string, column_number: A, value: cell_style, attribute_name: [border_top, border_bottom, border_left, border_right]}
 ```
 
-また、cell_styleやcell_fontの直後にピリオドを付けて属性名を指定することにより、その属性だけを取得することが出来ます。  
+
+また、`cell_style`や`cell_font`の直後にピリオドを付けて属性名を指定することにより、その属性だけを取得することが出来ます。  
 この場合はJSON文字列にはならず、属性の型に合う**type**を指定する必要があります。
 
 ```yaml
@@ -67,6 +75,9 @@ attribute_nameを指定することで、指定された属性だけを取得し
     - {name: foo, type: long, value: cell_style.border}
     - {name: bar, type: long, value: cell_font.color}
 ```
+
+なお、`cell_style`や`cell_font`では、**column_number**を省略した場合は直前と同じ列を対象とします。  
+（`cell_value`では、**column_number**を省略すると次の列に移る）
 
 
 ## Example
@@ -88,7 +99,8 @@ in:
 ```
 
 if omit `value`, specified `cell_value`.  
-if omit `column_number`, specified next column.
+if omit `column_number` when valus is `cell_value`, specified next column.  
+if omit `column_number` when valus is `cell_style`, specified same column.
 
 ### execute
 
