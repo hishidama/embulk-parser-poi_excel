@@ -25,8 +25,8 @@ public class TestPoiExcelParserPlugin_cellFont {
 			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
 			parser.set("sheet", "style");
 			parser.addColumn("color-text", "string");
-			parser.addColumn("font-color", "long").set("column_number", "C").set("value_type", "cell_font.color");
-			parser.addColumn("font-bold", "boolean").set("value_type", "cell_font.bold");
+			parser.addColumn("font-color", "long").set("column_number", "C").set("value", "cell_font.color");
+			parser.addColumn("font-bold", "boolean").set("value", "cell_font.bold");
 
 			URL inFile = getClass().getResource("test1.xls");
 			List<OutputRecord> result = tester.runParser(inFile, parser);
@@ -56,7 +56,7 @@ public class TestPoiExcelParserPlugin_cellFont {
 			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
 			parser.set("sheet", "style");
 			parser.addColumn("color-text", "string");
-			parser.addColumn("color-font", "string").set("column_number", "C").set("value_type", "cell_font");
+			parser.addColumn("color-font", "string").set("column_number", "C").set("value", "cell_font");
 
 			URL inFile = getClass().getResource("test1.xls");
 			List<OutputRecord> result = tester.runParser(inFile, parser);
@@ -108,7 +108,7 @@ public class TestPoiExcelParserPlugin_cellFont {
 			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
 			parser.set("sheet", "style");
 			parser.addColumn("color-text", "string");
-			parser.addColumn("color-font", "string").set("column_number", "C").set("value_type", "cell_font")
+			parser.addColumn("color-font", "string").set("column_number", "C").set("value", "cell_font")
 					.set("attribute_name", Arrays.asList("color", "bold"));
 
 			URL inFile = getClass().getResource("test1.xls");

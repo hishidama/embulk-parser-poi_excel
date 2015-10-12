@@ -76,12 +76,12 @@ public class TestPoiExcelParserPlugin {
 			parser.set("sheet", "test1");
 			parser.set("skip_header_lines", 1);
 			parser.set("cell_error_null", false);
-			parser.addColumn("sheet", "string").set("value_type", "sheet_name");
-			parser.addColumn("sheet-n", "long").set("value_type", "sheet_name");
-			parser.addColumn("row", "long").set("value_type", "row_number");
+			parser.addColumn("sheet", "string").set("value", "sheet_name");
+			parser.addColumn("sheet-n", "long").set("value", "sheet_name");
+			parser.addColumn("row", "long").set("value", "row_number");
 			parser.addColumn("flag", "boolean");
-			parser.addColumn("col-n", "long").set("value_type", "column_number");
-			parser.addColumn("col-s", "string").set("value_type", "column_number");
+			parser.addColumn("col-n", "long").set("value", "column_number");
+			parser.addColumn("col-s", "string").set("value", "column_number");
 
 			URL inFile = getClass().getResource("test1.xls");
 			List<OutputRecord> result = tester.runParser(inFile, parser);

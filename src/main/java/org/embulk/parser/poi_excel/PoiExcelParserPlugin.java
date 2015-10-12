@@ -78,7 +78,7 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		 * @see PoiExcelColumnValueType
 		 * @return value_type
 		 */
-		@Config("value_type")
+		@Config("value")
 		@ConfigDefault("\"cell_value\"")
 		public String getValueType();
 

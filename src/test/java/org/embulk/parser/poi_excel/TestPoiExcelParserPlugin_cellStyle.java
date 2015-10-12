@@ -24,13 +24,13 @@ public class TestPoiExcelParserPlugin_cellStyle {
 			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
 			parser.set("sheet", "style");
 			parser.addColumn("color-text", "string");
-			parser.addColumn("color", "string").set("value_type", "cell_style.fill_foreground_color");
+			parser.addColumn("color", "string").set("value", "cell_style.fill_foreground_color");
 			parser.addColumn("border-text", "string");
-			parser.addColumn("border-top", "long").set("value_type", "cell_style.border_top");
-			parser.addColumn("border-bottom", "long").set("value_type", "cell_style.border_bottom");
-			parser.addColumn("border-left", "long").set("value_type", "cell_style.border_left");
-			parser.addColumn("border-right", "long").set("value_type", "cell_style.border_right");
-			parser.addColumn("border-all", "long").set("value_type", "cell_style.border");
+			parser.addColumn("border-top", "long").set("value", "cell_style.border_top");
+			parser.addColumn("border-bottom", "long").set("value", "cell_style.border_bottom");
+			parser.addColumn("border-left", "long").set("value", "cell_style.border_left");
+			parser.addColumn("border-right", "long").set("value", "cell_style.border_right");
+			parser.addColumn("border-all", "long").set("value", "cell_style.border");
 
 			URL inFile = getClass().getResource("test1.xls");
 			List<OutputRecord> result = tester.runParser(inFile, parser);
@@ -66,8 +66,8 @@ public class TestPoiExcelParserPlugin_cellStyle {
 			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
 			parser.set("sheet", "style");
 			parser.addColumn("color-text", "string");
-			parser.addColumn("color-style", "string").set("column_number", "A").set("value_type", "cell_style");
-			parser.addColumn("border-style", "string").set("column_number", "B").set("value_type", "cell_style");
+			parser.addColumn("color-style", "string").set("column_number", "A").set("value", "cell_style");
+			parser.addColumn("border-style", "string").set("column_number", "B").set("value", "cell_style");
 
 			URL inFile = getClass().getResource("test1.xls");
 			List<OutputRecord> result = tester.runParser(inFile, parser);
@@ -113,9 +113,9 @@ public class TestPoiExcelParserPlugin_cellStyle {
 			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
 			parser.set("sheet", "style");
 			parser.addColumn("color-text", "string");
-			parser.addColumn("color-style", "string").set("column_number", "A").set("value_type", "cell_style")
+			parser.addColumn("color-style", "string").set("column_number", "A").set("value", "cell_style")
 					.set("cell_style_name", Arrays.asList("fill_foreground_color"));
-			parser.addColumn("border-style", "string").set("column_number", "B").set("value_type", "cell_style")
+			parser.addColumn("border-style", "string").set("column_number", "B").set("value", "cell_style")
 					.set("attribute_name", Arrays.asList("border_top", "border_bottom", "border_left", "border_right"));
 
 			URL inFile = getClass().getResource("test1.xls");

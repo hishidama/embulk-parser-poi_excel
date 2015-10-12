@@ -18,10 +18,10 @@ This plugin uses Apache POI.
 
 * **name**: Embulk column name. (string, required)
 * **type**: Embulk column type. (string, required)
-* **value_type**: value type. see below. (string, defualt: `cell_value`)
+* **value**: value type. see below. (string, defualt: `cell_value`)
 * **column_number**: Excel column number. see below. (string, default: next column)
 
-### value_type
+### value
 
 * **cell_value**: value in cell.
 * **cell_formula**: formula in cell. (if cell is not formula, same `cell_value`.)
@@ -47,7 +47,7 @@ This plugin uses Apache POI.
 
 ### attribute_name
 
-value_typeがcell_style, cell_font, cell_commentのとき、デフォルトでは、全属性を取得してJSON文字列に変換します。  
+**value**がcell_style, cell_font, cell_commentのとき、デフォルトでは、全属性を取得してJSON文字列に変換します。  
 （JSON文字列を返すので、**type**は`string`である必要があります）
 
 attribute_nameを指定することで、指定された属性だけを取得してJSON文字列に変換します。
@@ -56,7 +56,7 @@ attribute_nameを指定することで、指定された属性だけを取得し
 
 ```yaml
     columns:
-    - {name: foo, type: string, value_type: cell_style, attribute_name: [border_top, border_bottom, border_left, border_right]}
+    - {name: foo, type: string, value: cell_style, attribute_name: [border_top, border_bottom, border_left, border_right]}
 ```
 
 また、cell_styleやcell_fontの直後にピリオドを付けて属性名を指定することにより、その属性だけを取得することが出来ます。  
@@ -64,8 +64,8 @@ attribute_nameを指定することで、指定された属性だけを取得し
 
 ```yaml
     columns:
-    - {name: foo, type: long, value_type: cell_style.border}
-    - {name: bar, type: long, value_type: cell_font.color}
+    - {name: foo, type: long, value: cell_style.border}
+    - {name: bar, type: long, value: cell_font.color}
 ```
 
 
@@ -79,15 +79,15 @@ in:
     sheet: "DQ10-orb"
     skip_header_lines: 1	# first row is header.
     columns:
-    - {name: row, type: long, value_type: row_number}
-    - {name: get_date, type: timestamp, value_type: cell_value, column_number: A}
+    - {name: row, type: long, value: row_number}
+    - {name: get_date, type: timestamp, value: cell_value, column_number: A}
     - {name: orb_type, type: string}
     - {name: orb_name, type: string}
     - {name: orb_shape, type: long}
     - {name: drop_monster_name, type: string}
 ```
 
-if omit `value_type`, specified `cell_value`.  
+if omit `value`, specified `cell_value`.  
 if omit `column_number`, specified next column.
 
 ### execute

@@ -21,8 +21,8 @@ public class TestPoiExcelParserPlugin_cellComment {
 
 			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
 			parser.set("sheet", "comment");
-			parser.addColumn("author", "string").set("value_type", "cell_comment.author");
-			parser.addColumn("comment", "string").set("value_type", "cell_comment.string");
+			parser.addColumn("author", "string").set("value", "cell_comment.author");
+			parser.addColumn("comment", "string").set("value", "cell_comment.string");
 
 			URL inFile = getClass().getResource("test1.xls");
 			List<OutputRecord> result = tester.runParser(inFile, parser);
