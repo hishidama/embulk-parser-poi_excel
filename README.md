@@ -102,16 +102,13 @@ if omit `value`, specified `cell_value`.
 if omit `column_number` when valus is `cell_value`, specified next column.  
 if omit `column_number` when valus is `cell_style`, specified same column.
 
-### execute
+
+## Install
 
 ```
-$ cd ~/your-workspace
-$ git clone https://github.com/hishidama/embulk-parser-poi_excel.git
-$ cd embulk-parser-poi_excel
-$ ./gradlew package
-$ cd /your-embulk-working-dir
-$ embulk run -L ~/your-workspace/embulk-parser-poi_excel config.yml
+$ embulk gem install embulk-parser-poi_excel
 ```
+
 
 ## Build
 
