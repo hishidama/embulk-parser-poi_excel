@@ -24,14 +24,14 @@ This plugin uses Apache POI.
 
 ### value
 
-* **cell_value**: value in cell.
-* **cell_formula**: formula in cell. (if cell is not formula, same `cell_value`.)
-* **cell_style**: all cell style attributes. returned json string. see **attribute_name**. (**type** required `string`)
-* **cell_font**: all cell font attributes. returned json string. see **attribute_name**. (**type** required `string`)
-* **cell_comment**: all cell comment attributes. returned json string. see **attribute_name**. (**type** required `string`)
-* **sheet_name**: sheet name.
-* **row_number**: row number(1 origin).
-* **column_number**: column number(1 origin).
+* `cell_value`: value in cell.
+* `cell_formula`: formula in cell. (if cell is not formula, same `cell_value`.)
+* `cell_style`: all cell style attributes. returned json string. see **attribute_name**. (**type** required `string`)
+* `cell_font`: all cell font attributes. returned json string. see **attribute_name**. (**type** required `string`)
+* `cell_comment`: all cell comment attributes. returned json string. see **attribute_name**. (**type** required `string`)
+* `sheet_name`: sheet name.
+* `row_number`: row number(1 origin).
+* `column_number`: column number(1 origin).
 
 ### column_number
 
