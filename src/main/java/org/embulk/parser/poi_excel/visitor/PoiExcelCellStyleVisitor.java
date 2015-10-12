@@ -1,11 +1,16 @@
 package org.embulk.parser.poi_excel.visitor;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Color;
-import org.apache.poi.ss.util.CellUtil;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
 import org.embulk.parser.poi_excel.visitor.embulk.CellVisitor;
@@ -13,6 +18,8 @@ import org.embulk.spi.Column;
 import org.embulk.spi.PageBuilder;
 import org.embulk.spi.type.StringType;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Optional;
 
 public class PoiExcelCellStyleVisitor {
@@ -26,111 +33,256 @@ public class PoiExcelCellStyleVisitor {
 	}
 
 	public void visitCellStyle(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
-		Optional<String> nameOption = option.getCellStyleName();
-		if (!nameOption.isPresent()) {
-			throw new RuntimeException(MessageFormat.format("cell_style_name must be specified. column.name={0}",
-					column.getName()));
+		String suffix = option.getValueTypeSuffix();
+		if (suffix != null) {
+			visitCellStyleKey(column, option, cell, suffix, visitor);
+		} else {
+			visitCellStyleJson(column, option, cell, visitor);
 		}
+	}
 
-		String name = nameOption.get();
+	private void visitCellStyleKey(Column column, ColumnOptionTask option, Cell cell, String key, CellVisitor visitor) {
 		CellStyle style = cell.getCellStyle();
-		switch (name) {
-		case CellUtil.ALIGNMENT:
-			pageBuilder.setLong(column, style.getAlignment());
-			break;
-		case CellUtil.BORDER_BOTTOM:
-			pageBuilder.setLong(column, style.getBorderBottom());
-			break;
-		case CellUtil.BORDER_LEFT:
-			pageBuilder.setLong(column, style.getBorderLeft());
-			break;
-		case CellUtil.BORDER_RIGHT:
-			pageBuilder.setLong(column, style.getBorderRight());
-			break;
-		case CellUtil.BORDER_TOP:
-			pageBuilder.setLong(column, style.getBorderTop());
-			break;
-		case "border":
-			long border = (style.getBorderTop() << 24) | (style.getBorderBottom() << 16) | (style.getBorderLeft() << 8)
-					| style.getBorderRight();
-			pageBuilder.setLong(column, border);
-			break;
-		case CellUtil.BOTTOM_BORDER_COLOR:
-			if (style instanceof XSSFCellStyle) {
-				visitCellColor(column, ((XSSFCellStyle) style).getBottomBorderXSSFColor());
-			} else {
-				visitCellColor(column, style.getBottomBorderColor());
-			}
-			break;
-		case CellUtil.DATA_FORMAT:
-			if (column.getType() instanceof StringType) {
-				pageBuilder.setString(column, style.getDataFormatString());
-			} else {
-				pageBuilder.setLong(column, style.getDataFormat());
-			}
-			break;
-		case CellUtil.FILL_BACKGROUND_COLOR:
-			visitCellColor(column, style.getFillBackgroundColorColor());
-			break;
-		case CellUtil.FILL_FOREGROUND_COLOR:
-			visitCellColor(column, style.getFillForegroundColorColor());
-			break;
-		case CellUtil.FILL_PATTERN:
-			pageBuilder.setLong(column, style.getFillPattern());
-			break;
-		case CellUtil.HIDDEN:
-			pageBuilder.setBoolean(column, style.getHidden());
-			break;
-		case CellUtil.INDENTION:
-			pageBuilder.setLong(column, style.getIndention());
-			break;
-		case CellUtil.LEFT_BORDER_COLOR:
-			if (style instanceof XSSFCellStyle) {
-				visitCellColor(column, ((XSSFCellStyle) style).getLeftBorderXSSFColor());
-			} else {
-				visitCellColor(column, style.getLeftBorderColor());
-			}
-			break;
-		case CellUtil.LOCKED:
-			pageBuilder.setBoolean(column, style.getLocked());
-			break;
-		case CellUtil.RIGHT_BORDER_COLOR:
-			if (style instanceof XSSFCellStyle) {
-				visitCellColor(column, ((XSSFCellStyle) style).getRightBorderXSSFColor());
-			} else {
-				visitCellColor(column, style.getRightBorderColor());
-			}
-			break;
-		case CellUtil.ROTATION:
-			pageBuilder.setLong(column, style.getRotation());
-			break;
-		case CellUtil.TOP_BORDER_COLOR:
-			if (style instanceof XSSFCellStyle) {
-				visitCellColor(column, ((XSSFCellStyle) style).getTopBorderXSSFColor());
-			} else {
-				visitCellColor(column, style.getTopBorderColor());
-			}
-			break;
-		case CellUtil.VERTICAL_ALIGNMENT:
-			pageBuilder.setLong(column, style.getVerticalAlignment());
-			break;
-		case CellUtil.WRAP_TEXT:
-			pageBuilder.setBoolean(column, style.getWrapText());
-			break;
-		default:
-			throw new UnsupportedOperationException(MessageFormat.format("unsupported cell_style_name={0}", name));
+
+		Object value = getStyleValue(column, option, cell, style, key);
+		if (value == null) {
+			pageBuilder.setNull(column);
+		} else if (value instanceof String) {
+			visitor.visitCellValueString(column, style, (String) value);
+		} else if (value instanceof Short) {
+			visitor.visitValueLong(column, style, (Short) value);
+		} else if (value instanceof Integer) {
+			visitor.visitValueLong(column, style, (Integer) value);
+		} else if (value instanceof Boolean) {
+			visitor.visitCellValueBoolean(column, style, (Boolean) value);
+		} else {
+			throw new IllegalStateException(MessageFormat.format("unsupported conversion. type={0}, value={1}", value
+					.getClass().getName(), value));
 		}
 	}
 
-	protected final void visitCellColor(Column column, short colorIndex) {
-		PoiExcelVisitorFactory factory = visitorValue.getVisitorFactory();
-		PoiExcelColorVisitor delegator = factory.getPoiExcelColorVisitor();
-		delegator.visitCellColor(column, colorIndex);
+	private void visitCellStyleJson(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
+		CellStyle style = cell.getCellStyle();
+
+		Map<String, Object> result;
+
+		Optional<String> nameOption = option.getCellStyleName();
+		if (nameOption.isPresent()) {
+			result = new LinkedHashMap<>();
+
+			String s = nameOption.get();
+			String[] ss = s.split("\\s*,\\s*");
+			for (String key : ss) {
+				Object value = getStyleValue(column, option, cell, style, key);
+				result.put(key, value);
+			}
+		} else {
+			result = new TreeMap<>();
+
+			for (String key : STYLE_MAP.keySet()) {
+				if (key.equals("border")) {
+					continue;
+				}
+
+				Object value = getStyleValue(column, option, cell, style, key);
+				result.put(key, value);
+			}
+		}
+
+		String json;
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			json = mapper.writeValueAsString(result);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+
+		visitor.visitCellValueString(column, cell, json);
 	}
 
-	protected final void visitCellColor(Column column, Color color) {
-		PoiExcelVisitorFactory factory = visitorValue.getVisitorFactory();
-		PoiExcelColorVisitor delegator = factory.getPoiExcelColorVisitor();
-		delegator.visitCellColor(column, color);
+	protected Object getStyleValue(Column column, ColumnOptionTask option, Cell cell, CellStyle style, String key) {
+		CellStyleSupplier supplier = STYLE_MAP.get(key.toLowerCase());
+		if (supplier == null) {
+			throw new UnsupportedOperationException(MessageFormat.format(
+					"unsupported cell style name={0}, choose in {1}", key, new TreeSet<>(STYLE_MAP.keySet())));
+		}
+		Object value = supplier.get(column, cell, style);
+		if (value instanceof Color) {
+			int rgb = PoiExcelColorVisitor.getRGB((Color) value);
+			if (column.getType() instanceof StringType) {
+				value = String.format("%06x", rgb);
+			} else {
+				value = rgb;
+			}
+		}
+		return value;
+	}
+
+	protected static interface CellStyleSupplier {
+		public Object get(Column column, Cell cell, CellStyle style);
+	}
+
+	protected static final Map<String, CellStyleSupplier> STYLE_MAP;
+	static {
+		Map<String, CellStyleSupplier> map = new HashMap<>(32);
+		map.put("alignment", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				return style.getAlignment();
+			}
+		});
+		map.put("border", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				int n0 = style.getBorderTop();
+				int n1 = style.getBorderBottom();
+				int n2 = style.getBorderLeft();
+				int n3 = style.getBorderRight();
+				return (n0 << 24) | (n1 << 16) | (n2 << 8) | n3;
+			}
+		});
+		map.put("border_bottom", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				return style.getBorderBottom();
+			}
+		});
+		map.put("border_left", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				return style.getBorderLeft();
+			}
+		});
+		map.put("border_right", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				return style.getBorderRight();
+			}
+		});
+		map.put("border_top", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				return style.getBorderTop();
+			}
+		});
+		map.put("border_bottom_color", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				if (style instanceof XSSFCellStyle) {
+					return ((XSSFCellStyle) style).getBottomBorderXSSFColor();
+				} else {
+					Workbook book = cell.getSheet().getWorkbook();
+					short color = style.getBottomBorderColor();
+					return PoiExcelColorVisitor.getColor(book, color);
+				}
+			}
+		});
+		map.put("border_left_color", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				if (style instanceof XSSFCellStyle) {
+					return ((XSSFCellStyle) style).getLeftBorderXSSFColor();
+				} else {
+					Workbook book = cell.getSheet().getWorkbook();
+					short color = style.getLeftBorderColor();
+					return PoiExcelColorVisitor.getColor(book, color);
+				}
+			}
+		});
+		map.put("border_right_color", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				if (style instanceof XSSFCellStyle) {
+					return ((XSSFCellStyle) style).getRightBorderXSSFColor();
+				} else {
+					Workbook book = cell.getSheet().getWorkbook();
+					short color = style.getRightBorderColor();
+					return PoiExcelColorVisitor.getColor(book, color);
+				}
+			}
+		});
+		map.put("border_top_color", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				if (style instanceof XSSFCellStyle) {
+					return ((XSSFCellStyle) style).getTopBorderXSSFColor();
+				} else {
+					Workbook book = cell.getSheet().getWorkbook();
+					short color = style.getTopBorderColor();
+					return PoiExcelColorVisitor.getColor(book, color);
+				}
+			}
+		});
+		map.put("data_format", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				if (column.getType() instanceof StringType) {
+					return style.getDataFormatString();
+				} else {
+					return style.getDataFormat();
+				}
+			}
+		});
+		map.put("fill_background_color", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				return style.getFillBackgroundColorColor();
+			}
+		});
+		map.put("fill_foreground_color", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				return style.getFillForegroundColorColor();
+			}
+		});
+		map.put("fill_pattern", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				return style.getFillPattern();
+			}
+		});
+		map.put("font_index", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				return style.getFontIndex();
+			}
+		});
+		map.put("hidden", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				return style.getHidden();
+			}
+		});
+		map.put("indention", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				return style.getIndention();
+			}
+		});
+		map.put("locked", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				return style.getLocked();
+			}
+		});
+		map.put("rotation", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				return style.getRotation();
+			}
+		});
+		map.put("vertical_alignment", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				return style.getVerticalAlignment();
+			}
+		});
+		map.put("wrap_text", new CellStyleSupplier() {
+			@Override
+			public Object get(Column column, Cell cell, CellStyle style) {
+				return style.getWrapText();
+			}
+		});
+		STYLE_MAP = map;
 	}
 }

@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
 
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.embulk.config.ConfigSource;
 import org.embulk.parser.EmbulkPluginTester;
 import org.embulk.parser.EmbulkTestOutputPlugin.OutputRecord;
@@ -185,54 +184,6 @@ public class TestPoiExcelParserPlugin {
 		// System.out.println(r);
 		assertThat(r.getAsString("a"), is(a));
 		assertThat(r.getAsString("b"), is(b));
-	}
-
-	@Test
-	public void testStyle() throws ParseException {
-		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
-			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
-
-			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
-			parser.set("sheet", "style");
-			parser.addColumn("color-text", "string");
-			parser.addColumn("color", "string").set("value_type", "cell_style")
-					.set("cell_style_name", "fillForegroundColor");
-			parser.addColumn("border-text", "string");
-			parser.addColumn("border-top", "long").set("cell_style_name", "borderTop");
-			parser.addColumn("border-bottom", "long").set("cell_style_name", "borderBottom");
-			parser.addColumn("border-left", "long").set("cell_style_name", "borderLeft");
-			parser.addColumn("border-right", "long").set("cell_style_name", "borderRight");
-			parser.addColumn("border-all", "long").set("cell_style_name", "border");
-			parser.addColumn("font-color", "long").set("column_number", "C").set("value_type", "cell_font")
-					.set("cell_style_name", "fontColor");
-			parser.addColumn("font-bold", "boolean").set("value_type", "cell_font").set("cell_style_name", "fontBold");
-
-			URL inFile = getClass().getResource("test1.xls");
-			List<OutputRecord> result = tester.runParser(inFile, parser);
-
-			assertThat(result.size(), is(5));
-			check7(result, 0, "red", 255, 0, 0, "top", CellStyle.BORDER_THIN, 0, 0, 0, null, false);
-			check7(result, 1, "green", 0, 128, 0, null, 0, 0, 0, 0, 0xff0000L, true);
-			check7(result, 2, "blue", 0, 0, 255, "left", 0, 0, CellStyle.BORDER_THIN, 0, null, null);
-			check7(result, 3, "white", 255, 255, 255, "right", 0, 0, 0, CellStyle.BORDER_THIN, null, null);
-			check7(result, 4, "black", 0, 0, 0, "bottom", 0, CellStyle.BORDER_MEDIUM, 0, 0, null, null);
-		}
-	}
-
-	private void check7(List<OutputRecord> result, int index, String colorText, int r, int g, int b, String borderText,
-			long top, long bottom, long left, long right, Long fontColor, Boolean fontBold) {
-		OutputRecord record = result.get(index);
-		// System.out.println(record);
-		assertThat(record.getAsString("color-text"), is(colorText));
-		assertThat(record.getAsString("color"), is(String.format("%02x%02x%02x", r, g, b)));
-		assertThat(record.getAsString("border-text"), is(borderText));
-		assertThat(record.getAsLong("border-top"), is(top));
-		assertThat(record.getAsLong("border-bottom"), is(bottom));
-		assertThat(record.getAsLong("border-left"), is(left));
-		assertThat(record.getAsLong("border-right"), is(right));
-		assertThat(record.getAsLong("border-all"), is(top << 24 | bottom << 16 | left << 8 | right));
-		assertThat(record.getAsLong("font-color"), is(fontColor));
-		assertThat(record.getAsBoolean("font-bold"), is(fontBold));
 	}
 
 	@Test

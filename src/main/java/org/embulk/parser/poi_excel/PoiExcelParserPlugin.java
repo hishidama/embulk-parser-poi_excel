@@ -86,6 +86,10 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 
 		public PoiExcelColumnValueType getValueTypeEnum();
 
+		public void setValueTypeSuffix(String suffix);
+
+		public String getValueTypeSuffix();
+
 		// A,B,... or number(1 origin)
 		@Config("column_number")
 		@ConfigDefault("null")
@@ -111,7 +115,7 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		@ConfigDefault("null")
 		public Optional<Boolean> getCellErrorNull();
 
-		// when value_type=cell_style
+		// use when value_type=cell_style, cell_font, ...
 		@Config("cell_style_name")
 		@ConfigDefault("null")
 		public Optional<String> getCellStyleName();

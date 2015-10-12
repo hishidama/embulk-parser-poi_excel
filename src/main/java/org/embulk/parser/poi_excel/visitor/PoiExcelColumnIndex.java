@@ -28,18 +28,20 @@ public class PoiExcelColumnIndex {
 		Schema schema = task.getColumns().toSchema();
 		for (Column column : schema.getColumns()) {
 			ColumnOptionTask option = columnOptions.get(column.getIndex());
-			String type = option.getValueType();
+
+			String type = option.getValueType().trim();
+			int n = type.indexOf('.');
+			if (n >= 0) {
+				String suffix = type.substring(n + 1).trim();
+				option.setValueTypeSuffix(suffix);
+				type = type.substring(0, n).trim();
+			}
 
 			PoiExcelColumnValueType valueType;
-			if (option.getCellStyleName().isPresent()
-					&& PoiExcelColumnValueType.CELL_VALUE.name().equalsIgnoreCase(type)) {
-				valueType = PoiExcelColumnValueType.CELL_STYLE;
-			} else {
-				try {
-					valueType = PoiExcelColumnValueType.valueOf(type.toUpperCase());
-				} catch (Exception e) {
-					throw new RuntimeException(MessageFormat.format("illegal value_type={0}", type), e);
-				}
+			try {
+				valueType = PoiExcelColumnValueType.valueOf(type.toUpperCase());
+			} catch (Exception e) {
+				throw new RuntimeException(MessageFormat.format("illegal value_type={0}", type), e);
 			}
 			option.setValueTypeEnum(valueType);
 

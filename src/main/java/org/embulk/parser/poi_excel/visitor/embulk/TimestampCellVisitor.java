@@ -42,6 +42,11 @@ public class TimestampCellVisitor extends CellVisitor {
 	}
 
 	@Override
+	public void visitValueLong(Column column, Object source, long value) {
+		pageBuilder.setTimestamp(column, Timestamp.ofEpochMilli(value));
+	}
+
+	@Override
 	public void visitSheetName(Column column) {
 		throw new UnsupportedOperationException("unsupported conversion sheet_name to Embulk timestamp.");
 	}

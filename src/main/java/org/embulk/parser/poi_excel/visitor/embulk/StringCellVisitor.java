@@ -39,6 +39,12 @@ public class StringCellVisitor extends CellVisitor {
 	}
 
 	@Override
+	public void visitValueLong(Column column, Object source, long value) {
+		String s = Long.toString(value);
+		pageBuilder.setString(column, s);
+	}
+
+	@Override
 	public void visitSheetName(Column column) {
 		Sheet sheet = visitorValue.getSheet();
 		pageBuilder.setString(column, sheet.getSheetName());

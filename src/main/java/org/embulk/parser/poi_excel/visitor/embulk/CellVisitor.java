@@ -31,6 +31,8 @@ public abstract class CellVisitor {
 		pageBuilder.setString(column, cell.getCellFormula());
 	}
 
+	public abstract void visitValueLong(Column column, Object source, long value);
+
 	public abstract void visitSheetName(Column column);
 
 	public abstract void visitRowNumber(Column column, int index1);

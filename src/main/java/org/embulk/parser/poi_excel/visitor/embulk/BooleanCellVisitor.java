@@ -31,6 +31,11 @@ public class BooleanCellVisitor extends CellVisitor {
 	}
 
 	@Override
+	public void visitValueLong(Column column, Object source, long value) {
+		pageBuilder.setBoolean(column, value != 0);
+	}
+
+	@Override
 	public void visitSheetName(Column column) {
 		Sheet sheet = visitorValue.getSheet();
 		int index = sheet.getWorkbook().getSheetIndex(sheet);
