@@ -50,8 +50,8 @@ public class PoiExcelColumnIndex {
 				if (index < 0) {
 					index = 0;
 				}
-				log.info("column.name={} <- cell column={}", column.getName(),
-						CellReference.convertNumToColString(index));
+				log.info("column.name={} <- cell column={}, value_type={}", column.getName(),
+						CellReference.convertNumToColString(index), valueType);
 				option.setColumnIndex(index);
 				indexMap.put(column.getName(), index);
 			}
