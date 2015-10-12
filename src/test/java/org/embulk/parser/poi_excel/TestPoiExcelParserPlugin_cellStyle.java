@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 
 import java.net.URL;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -31,8 +32,9 @@ public class TestPoiExcelParserPlugin_cellStyle {
 			parser.addColumn("border-right", "long").set("value_type", "cell_style.border_right");
 			parser.addColumn("border-all", "long").set("value_type", "cell_style.border");
 			parser.addColumn("font-color", "long").set("column_number", "C").set("value_type", "cell_font")
-					.set("cell_style_name", "fontColor");
-			parser.addColumn("font-bold", "boolean").set("value_type", "cell_font").set("cell_style_name", "fontBold");
+					.set("cell_style_name", Arrays.asList("fontColor"));
+			parser.addColumn("font-bold", "boolean").set("value_type", "cell_font")
+					.set("cell_style_name", Arrays.asList("fontBold"));
 
 			URL inFile = getClass().getResource("test1.xls");
 			List<OutputRecord> result = tester.runParser(inFile, parser);
@@ -118,9 +120,11 @@ public class TestPoiExcelParserPlugin_cellStyle {
 			parser.set("sheet", "style");
 			parser.addColumn("color-text", "string");
 			parser.addColumn("color-style", "string").set("column_number", "A").set("value_type", "cell_style")
-					.set("cell_style_name", "fill_foreground_color");
-			parser.addColumn("border-style", "string").set("column_number", "B").set("value_type", "cell_style")
-					.set("cell_style_name", "border_top, border_bottom, border_left, border_right");
+					.set("cell_style_name", Arrays.asList("fill_foreground_color"));
+			parser.addColumn("border-style", "string")
+					.set("column_number", "B")
+					.set("value_type", "cell_style")
+					.set("cell_style_name", Arrays.asList("border_top", "border_bottom", "border_left", "border_right"));
 
 			URL inFile = getClass().getResource("test1.xls");
 			List<OutputRecord> result = tester.runParser(inFile, parser);

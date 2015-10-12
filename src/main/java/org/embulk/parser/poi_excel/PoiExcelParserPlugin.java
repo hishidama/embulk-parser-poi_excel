@@ -118,7 +118,7 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		// use when value_type=cell_style, cell_font, ...
 		@Config("cell_style_name")
 		@ConfigDefault("null")
-		public Optional<String> getCellStyleName();
+		public Optional<List<String>> getCellStyleName();
 	}
 
 	public interface FormulaReplaceTask extends Task {

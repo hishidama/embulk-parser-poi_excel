@@ -3,6 +3,7 @@ package org.embulk.parser.poi_excel.visitor;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -66,13 +67,12 @@ public class PoiExcelCellStyleVisitor {
 
 		Map<String, Object> result;
 
-		Optional<String> nameOption = option.getCellStyleName();
+		Optional<List<String>> nameOption = option.getCellStyleName();
 		if (nameOption.isPresent()) {
 			result = new LinkedHashMap<>();
 
-			String s = nameOption.get();
-			String[] ss = s.split("\\s*,\\s*");
-			for (String key : ss) {
+			List<String> list = nameOption.get();
+			for (String key : list) {
 				Object value = getStyleValue(column, option, cell, style, key);
 				result.put(key, value);
 			}

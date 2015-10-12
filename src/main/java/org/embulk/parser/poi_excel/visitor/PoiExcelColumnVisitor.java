@@ -139,12 +139,13 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 
 	protected void visitCellFont(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
 		CellStyle style = cell.getCellStyle();
-		Optional<String> nameOption = option.getCellStyleName();
+		Optional<List<String>> nameOption = option.getCellStyleName();
 		if (!nameOption.isPresent()) {
 			throw new RuntimeException(MessageFormat.format("cell_style_name must be specified. column.name={0}",
 					column.getName()));
 		}
-		String name = nameOption.get();
+		List<String> list = nameOption.get();
+		String name = list.get(0); // TODO 全name
 
 		PoiExcelCellFontVisitor delegator = factory.getPoiExcelCellFontVisitor();
 		delegator.visitCellFont(column, style, name);
