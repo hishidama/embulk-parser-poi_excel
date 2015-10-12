@@ -4,7 +4,6 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellReference;
 import org.embulk.parser.poi_excel.PoiExcelColumnValueType;
@@ -14,8 +13,6 @@ import org.embulk.parser.poi_excel.visitor.embulk.CellVisitor;
 import org.embulk.spi.Column;
 import org.embulk.spi.ColumnVisitor;
 import org.embulk.spi.PageBuilder;
-
-import com.google.common.base.Optional;
 
 public class PoiExcelColumnVisitor implements ColumnVisitor {
 
@@ -138,17 +135,8 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 	}
 
 	protected void visitCellFont(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
-		CellStyle style = cell.getCellStyle();
-		Optional<List<String>> nameOption = option.getCellStyleName();
-		if (!nameOption.isPresent()) {
-			throw new RuntimeException(MessageFormat.format("cell_style_name must be specified. column.name={0}",
-					column.getName()));
-		}
-		List<String> list = nameOption.get();
-		String name = list.get(0); // TODO 全name
-
 		PoiExcelCellFontVisitor delegator = factory.getPoiExcelCellFontVisitor();
-		delegator.visitCellFont(column, style, name);
+		delegator.visitCellFont(column, option, cell, visitor);
 	}
 
 	protected void visitCellComment(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {

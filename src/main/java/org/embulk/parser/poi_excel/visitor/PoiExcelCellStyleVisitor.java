@@ -34,26 +34,25 @@ public class PoiExcelCellStyleVisitor {
 	}
 
 	public void visitCellStyle(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
+		CellStyle style = cell.getCellStyle();
+
 		String suffix = option.getValueTypeSuffix();
 		if (suffix != null) {
-			visitCellStyleKey(column, option, cell, suffix, visitor);
+			visitCellStyleKey(column, option, suffix, cell, style, visitor);
 		} else {
-			visitCellStyleJson(column, option, cell, visitor);
+			visitCellStyleJson(column, option, cell, style, visitor);
 		}
 	}
 
-	private void visitCellStyleKey(Column column, ColumnOptionTask option, Cell cell, String key, CellVisitor visitor) {
-		CellStyle style = cell.getCellStyle();
-
+	private void visitCellStyleKey(Column column, ColumnOptionTask option, String key, Cell cell, CellStyle style,
+			CellVisitor visitor) {
 		Object value = getStyleValue(column, option, cell, style, key);
 		if (value == null) {
 			pageBuilder.setNull(column);
 		} else if (value instanceof String) {
 			visitor.visitCellValueString(column, style, (String) value);
-		} else if (value instanceof Short) {
-			visitor.visitValueLong(column, style, (Short) value);
-		} else if (value instanceof Integer) {
-			visitor.visitValueLong(column, style, (Integer) value);
+		} else if (value instanceof Long) {
+			visitor.visitValueLong(column, style, (Long) value);
 		} else if (value instanceof Boolean) {
 			visitor.visitCellValueBoolean(column, style, (Boolean) value);
 		} else {
@@ -62,9 +61,8 @@ public class PoiExcelCellStyleVisitor {
 		}
 	}
 
-	private void visitCellStyleJson(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
-		CellStyle style = cell.getCellStyle();
-
+	private void visitCellStyleJson(Column column, ColumnOptionTask option, Cell cell, CellStyle style,
+			CellVisitor visitor) {
 		Map<String, Object> result;
 
 		Optional<List<String>> nameOption = option.getCellStyleName();
@@ -112,7 +110,7 @@ public class PoiExcelCellStyleVisitor {
 			if (column.getType() instanceof StringType) {
 				value = String.format("%06x", rgb);
 			} else {
-				value = rgb;
+				value = (long) rgb;
 			}
 		}
 		return value;
@@ -128,7 +126,7 @@ public class PoiExcelCellStyleVisitor {
 		map.put("alignment", new CellStyleSupplier() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return style.getAlignment();
+				return (long) style.getAlignment();
 			}
 		});
 		map.put("border", new CellStyleSupplier() {
@@ -138,31 +136,34 @@ public class PoiExcelCellStyleVisitor {
 				int n1 = style.getBorderBottom();
 				int n2 = style.getBorderLeft();
 				int n3 = style.getBorderRight();
-				return (n0 << 24) | (n1 << 16) | (n2 << 8) | n3;
+				if (column.getType() instanceof StringType) {
+					return String.format("%02x%02x%02x%02x", n0, n1, n2, n3);
+				}
+				return (long) ((n0 << 24) | (n1 << 16) | (n2 << 8) | n3);
 			}
 		});
 		map.put("border_bottom", new CellStyleSupplier() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return style.getBorderBottom();
+				return (long) style.getBorderBottom();
 			}
 		});
 		map.put("border_left", new CellStyleSupplier() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return style.getBorderLeft();
+				return (long) style.getBorderLeft();
 			}
 		});
 		map.put("border_right", new CellStyleSupplier() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return style.getBorderRight();
+				return (long) style.getBorderRight();
 			}
 		});
 		map.put("border_top", new CellStyleSupplier() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return style.getBorderTop();
+				return (long) style.getBorderTop();
 			}
 		});
 		map.put("border_bottom_color", new CellStyleSupplier() {
@@ -219,7 +220,7 @@ public class PoiExcelCellStyleVisitor {
 				if (column.getType() instanceof StringType) {
 					return style.getDataFormatString();
 				} else {
-					return style.getDataFormat();
+					return (long) style.getDataFormat();
 				}
 			}
 		});
@@ -238,13 +239,13 @@ public class PoiExcelCellStyleVisitor {
 		map.put("fill_pattern", new CellStyleSupplier() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return style.getFillPattern();
+				return (long) style.getFillPattern();
 			}
 		});
 		map.put("font_index", new CellStyleSupplier() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return style.getFontIndex();
+				return (long) style.getFontIndex();
 			}
 		});
 		map.put("hidden", new CellStyleSupplier() {
@@ -256,7 +257,7 @@ public class PoiExcelCellStyleVisitor {
 		map.put("indention", new CellStyleSupplier() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return style.getIndention();
+				return (long) style.getIndention();
 			}
 		});
 		map.put("locked", new CellStyleSupplier() {
@@ -268,13 +269,13 @@ public class PoiExcelCellStyleVisitor {
 		map.put("rotation", new CellStyleSupplier() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return style.getRotation();
+				return (long) style.getRotation();
 			}
 		});
 		map.put("vertical_alignment", new CellStyleSupplier() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return style.getVerticalAlignment();
+				return (long) style.getVerticalAlignment();
 			}
 		});
 		map.put("wrap_text", new CellStyleSupplier() {

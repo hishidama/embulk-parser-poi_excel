@@ -31,25 +31,21 @@ public class TestPoiExcelParserPlugin_cellStyle {
 			parser.addColumn("border-left", "long").set("value_type", "cell_style.border_left");
 			parser.addColumn("border-right", "long").set("value_type", "cell_style.border_right");
 			parser.addColumn("border-all", "long").set("value_type", "cell_style.border");
-			parser.addColumn("font-color", "long").set("column_number", "C").set("value_type", "cell_font")
-					.set("cell_style_name", Arrays.asList("fontColor"));
-			parser.addColumn("font-bold", "boolean").set("value_type", "cell_font")
-					.set("cell_style_name", Arrays.asList("fontBold"));
 
 			URL inFile = getClass().getResource("test1.xls");
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(5));
-			check1(result, 0, "red", 255, 0, 0, "top", CellStyle.BORDER_THIN, 0, 0, 0, null, false);
-			check1(result, 1, "green", 0, 128, 0, null, 0, 0, 0, 0, 0xff0000L, true);
-			check1(result, 2, "blue", 0, 0, 255, "left", 0, 0, CellStyle.BORDER_THIN, 0, null, null);
-			check1(result, 3, "white", 255, 255, 255, "right", 0, 0, 0, CellStyle.BORDER_THIN, null, null);
-			check1(result, 4, "black", 0, 0, 0, "bottom", 0, CellStyle.BORDER_MEDIUM, 0, 0, null, null);
+			check1(result, 0, "red", 255, 0, 0, "top", CellStyle.BORDER_THIN, 0, 0, 0);
+			check1(result, 1, "green", 0, 128, 0, null, 0, 0, 0, 0);
+			check1(result, 2, "blue", 0, 0, 255, "left", 0, 0, CellStyle.BORDER_THIN, 0);
+			check1(result, 3, "white", 255, 255, 255, "right", 0, 0, 0, CellStyle.BORDER_THIN);
+			check1(result, 4, "black", 0, 0, 0, "bottom", 0, CellStyle.BORDER_MEDIUM, 0, 0);
 		}
 	}
 
 	private void check1(List<OutputRecord> result, int index, String colorText, int r, int g, int b, String borderText,
-			long top, long bottom, long left, long right, Long fontColor, Boolean fontBold) {
+			long top, long bottom, long left, long right) {
 		OutputRecord record = result.get(index);
 		// System.out.println(record);
 		assertThat(record.getAsString("color-text"), is(colorText));
@@ -60,8 +56,6 @@ public class TestPoiExcelParserPlugin_cellStyle {
 		assertThat(record.getAsLong("border-left"), is(left));
 		assertThat(record.getAsLong("border-right"), is(right));
 		assertThat(record.getAsLong("border-all"), is(top << 24 | bottom << 16 | left << 8 | right));
-		assertThat(record.getAsLong("font-color"), is(fontColor));
-		assertThat(record.getAsBoolean("font-bold"), is(fontBold));
 	}
 
 	@Test
