@@ -116,9 +116,9 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		public Optional<Boolean> getCellErrorNull();
 
 		// use when value_type=cell_style, cell_font, ...
-		@Config("cell_style_name")
+		@Config("attribute_name")
 		@ConfigDefault("null")
-		public Optional<List<String>> getCellStyleName();
+		public Optional<List<String>> getAttributeName();
 	}
 
 	public interface FormulaReplaceTask extends Task {

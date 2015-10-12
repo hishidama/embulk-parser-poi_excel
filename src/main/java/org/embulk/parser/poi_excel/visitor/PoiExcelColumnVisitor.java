@@ -131,12 +131,12 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 
 	protected void visitCellStyle(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
 		PoiExcelCellStyleVisitor delegator = factory.getPoiExcelCellStyleVisitor();
-		delegator.visitCellStyle(column, option, cell, visitor);
+		delegator.visit(column, option, cell, visitor);
 	}
 
 	protected void visitCellFont(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
 		PoiExcelCellFontVisitor delegator = factory.getPoiExcelCellFontVisitor();
-		delegator.visitCellFont(column, option, cell, visitor);
+		delegator.visit(column, option, cell, visitor);
 	}
 
 	protected void visitCellComment(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {

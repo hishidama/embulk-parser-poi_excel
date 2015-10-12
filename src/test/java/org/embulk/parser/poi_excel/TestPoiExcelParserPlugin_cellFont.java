@@ -109,7 +109,7 @@ public class TestPoiExcelParserPlugin_cellFont {
 			parser.set("sheet", "style");
 			parser.addColumn("color-text", "string");
 			parser.addColumn("color-font", "string").set("column_number", "C").set("value_type", "cell_font")
-					.set("cell_style_name", Arrays.asList("color", "bold"));
+					.set("attribute_name", Arrays.asList("color", "bold"));
 
 			URL inFile = getClass().getResource("test1.xls");
 			List<OutputRecord> result = tester.runParser(inFile, parser);

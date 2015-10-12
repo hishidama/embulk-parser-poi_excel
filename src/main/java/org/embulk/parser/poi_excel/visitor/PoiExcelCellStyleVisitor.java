@@ -1,11 +1,12 @@
 package org.embulk.parser.poi_excel.visitor;
 
 import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -14,91 +15,27 @@ import org.apache.poi.ss.usermodel.Color;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
-import org.embulk.parser.poi_excel.visitor.embulk.CellVisitor;
 import org.embulk.spi.Column;
-import org.embulk.spi.PageBuilder;
 import org.embulk.spi.type.StringType;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
-
-public class PoiExcelCellStyleVisitor {
-
-	protected final PoiExcelVisitorValue visitorValue;
-	protected final PageBuilder pageBuilder;
+public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisitor<CellStyle> {
 
 	public PoiExcelCellStyleVisitor(PoiExcelVisitorValue visitorValue) {
-		this.visitorValue = visitorValue;
-		this.pageBuilder = visitorValue.getPageBuilder();
+		super(visitorValue);
 	}
 
-	public void visitCellStyle(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
-		CellStyle style = cell.getCellStyle();
-
-		String suffix = option.getValueTypeSuffix();
-		if (suffix != null) {
-			visitCellStyleKey(column, option, suffix, cell, style, visitor);
-		} else {
-			visitCellStyleJson(column, option, cell, style, visitor);
-		}
+	@Override
+	protected CellStyle getAttributeSource(Column column, ColumnOptionTask option, Cell cell) {
+		return cell.getCellStyle();
 	}
 
-	private void visitCellStyleKey(Column column, ColumnOptionTask option, String key, Cell cell, CellStyle style,
-			CellVisitor visitor) {
-		Object value = getStyleValue(column, option, cell, style, key);
-		if (value == null) {
-			pageBuilder.setNull(column);
-		} else if (value instanceof String) {
-			visitor.visitCellValueString(column, style, (String) value);
-		} else if (value instanceof Long) {
-			visitor.visitValueLong(column, style, (Long) value);
-		} else if (value instanceof Boolean) {
-			visitor.visitCellValueBoolean(column, style, (Boolean) value);
-		} else {
-			throw new IllegalStateException(MessageFormat.format("unsupported conversion. type={0}, value={1}", value
-					.getClass().getName(), value));
-		}
+	@Override
+	protected Collection<String> geyAllKeys() {
+		return ALL_KEYS;
 	}
 
-	private void visitCellStyleJson(Column column, ColumnOptionTask option, Cell cell, CellStyle style,
-			CellVisitor visitor) {
-		Map<String, Object> result;
-
-		Optional<List<String>> nameOption = option.getCellStyleName();
-		if (nameOption.isPresent()) {
-			result = new LinkedHashMap<>();
-
-			List<String> list = nameOption.get();
-			for (String key : list) {
-				Object value = getStyleValue(column, option, cell, style, key);
-				result.put(key, value);
-			}
-		} else {
-			result = new TreeMap<>();
-
-			for (String key : STYLE_MAP.keySet()) {
-				if (key.equals("border")) {
-					continue;
-				}
-
-				Object value = getStyleValue(column, option, cell, style, key);
-				result.put(key, value);
-			}
-		}
-
-		String json;
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			json = mapper.writeValueAsString(result);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-
-		visitor.visitCellValueString(column, cell, json);
-	}
-
-	protected Object getStyleValue(Column column, ColumnOptionTask option, Cell cell, CellStyle style, String key) {
+	@Override
+	protected Object getAttributeValue(Column column, ColumnOptionTask option, Cell cell, CellStyle style, String key) {
 		CellStyleSupplier supplier = STYLE_MAP.get(key.toLowerCase());
 		if (supplier == null) {
 			throw new UnsupportedOperationException(MessageFormat.format(
@@ -121,6 +58,8 @@ public class PoiExcelCellStyleVisitor {
 	}
 
 	protected static final Map<String, CellStyleSupplier> STYLE_MAP;
+	protected static final Set<String> ALL_KEYS;
+
 	static {
 		Map<String, CellStyleSupplier> map = new HashMap<>(32);
 		map.put("alignment", new CellStyleSupplier() {
@@ -284,6 +223,10 @@ public class PoiExcelCellStyleVisitor {
 				return style.getWrapText();
 			}
 		});
-		STYLE_MAP = map;
+		STYLE_MAP = Collections.unmodifiableMap(map);
+
+		Set<String> set = new HashSet<String>(STYLE_MAP.keySet());
+		set.remove("border");
+		ALL_KEYS = Collections.unmodifiableSet(set);
 	}
 }

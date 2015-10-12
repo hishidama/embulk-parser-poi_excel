@@ -1,11 +1,10 @@
 package org.embulk.parser.poi_excel.visitor;
 
 import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -15,93 +14,30 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
-import org.embulk.parser.poi_excel.visitor.embulk.CellVisitor;
 import org.embulk.spi.Column;
-import org.embulk.spi.PageBuilder;
 import org.embulk.spi.type.StringType;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
-
-public class PoiExcelCellFontVisitor {
-
-	protected final PoiExcelVisitorValue visitorValue;
-	protected final PageBuilder pageBuilder;
+public class PoiExcelCellFontVisitor extends AbstractPoiExcelCellAttributeVisitor<Font> {
 
 	public PoiExcelCellFontVisitor(PoiExcelVisitorValue visitorValue) {
-		this.visitorValue = visitorValue;
-		this.pageBuilder = visitorValue.getPageBuilder();
+		super(visitorValue);
 	}
 
-	public void visitCellFont(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
+	@Override
+	protected Font getAttributeSource(Column column, ColumnOptionTask option, Cell cell) {
 		CellStyle style = cell.getCellStyle();
 		short index = style.getFontIndex();
 		Workbook book = visitorValue.getSheet().getWorkbook();
-		Font font = book.getFontAt(index);
-		if (font == null) {
-			pageBuilder.setNull(column);
-			return;
-		}
-
-		String suffix = option.getValueTypeSuffix();
-		if (suffix != null) {
-			visitCellFontKey(column, option, suffix, cell, font, visitor);
-		} else {
-			visitCellFontJson(column, option, cell, font, visitor);
-		}
+		return book.getFontAt(index);
 	}
 
-	private void visitCellFontKey(Column column, ColumnOptionTask option, String key, Cell cell, Font font,
-			CellVisitor visitor) {
-		Object value = getFontValue(column, option, cell, font, key);
-		if (value == null) {
-			pageBuilder.setNull(column);
-		} else if (value instanceof String) {
-			visitor.visitCellValueString(column, font, (String) value);
-		} else if (value instanceof Long) {
-			visitor.visitValueLong(column, font, (Long) value);
-		} else if (value instanceof Boolean) {
-			visitor.visitCellValueBoolean(column, font, (Boolean) value);
-		} else {
-			throw new IllegalStateException(MessageFormat.format("unsupported conversion. type={0}, value={1}", value
-					.getClass().getName(), value));
-		}
+	@Override
+	protected Collection<String> geyAllKeys() {
+		return STYLE_MAP.keySet();
 	}
 
-	private void visitCellFontJson(Column column, ColumnOptionTask option, Cell cell, Font font, CellVisitor visitor) {
-		Map<String, Object> result;
-
-		Optional<List<String>> nameOption = option.getCellStyleName();
-		if (nameOption.isPresent()) {
-			result = new LinkedHashMap<>();
-
-			List<String> list = nameOption.get();
-			for (String key : list) {
-				Object value = getFontValue(column, option, cell, font, key);
-				result.put(key, value);
-			}
-		} else {
-			result = new TreeMap<>();
-
-			for (String key : STYLE_MAP.keySet()) {
-				Object value = getFontValue(column, option, cell, font, key);
-				result.put(key, value);
-			}
-		}
-
-		String json;
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			json = mapper.writeValueAsString(result);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-
-		visitor.visitCellValueString(column, cell, json);
-	}
-
-	protected Object getFontValue(Column column, ColumnOptionTask option, Cell cell, Font font, String key) {
+	@Override
+	protected Object getAttributeValue(Column column, ColumnOptionTask option, Cell cell, Font font, String key) {
 		CellStyleSupplier supplier = STYLE_MAP.get(key.toLowerCase());
 		if (supplier == null) {
 			throw new UnsupportedOperationException(MessageFormat.format(
@@ -204,6 +140,6 @@ public class PoiExcelCellFontVisitor {
 				return font.getBold();
 			}
 		});
-		STYLE_MAP = map;
+		STYLE_MAP = Collections.unmodifiableMap(map);
 	}
 }

@@ -115,10 +115,8 @@ public class TestPoiExcelParserPlugin_cellStyle {
 			parser.addColumn("color-text", "string");
 			parser.addColumn("color-style", "string").set("column_number", "A").set("value_type", "cell_style")
 					.set("cell_style_name", Arrays.asList("fill_foreground_color"));
-			parser.addColumn("border-style", "string")
-					.set("column_number", "B")
-					.set("value_type", "cell_style")
-					.set("cell_style_name", Arrays.asList("border_top", "border_bottom", "border_left", "border_right"));
+			parser.addColumn("border-style", "string").set("column_number", "B").set("value_type", "cell_style")
+					.set("attribute_name", Arrays.asList("border_top", "border_bottom", "border_left", "border_right"));
 
 			URL inFile = getClass().getResource("test1.xls");
 			List<OutputRecord> result = tester.runParser(inFile, parser);
