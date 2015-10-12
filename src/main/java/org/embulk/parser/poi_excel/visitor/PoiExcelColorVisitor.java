@@ -8,6 +8,7 @@ import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.Color;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.embulk.parser.poi_excel.visitor.embulk.CellVisitor;
 import org.embulk.spi.Column;
 import org.embulk.spi.PageBuilder;
 import org.embulk.spi.type.StringType;
@@ -15,36 +16,38 @@ import org.embulk.spi.type.StringType;
 public class PoiExcelColorVisitor {
 
 	protected final PoiExcelVisitorValue visitorValue;
-	protected final PageBuilder pageBuilder;
 
 	public PoiExcelColorVisitor(PoiExcelVisitorValue visitorValue) {
 		this.visitorValue = visitorValue;
-		this.pageBuilder = visitorValue.getPageBuilder();
 	}
 
-	public void visitCellColor(Column column, short colorIndex) {
-		HSSFWorkbook book = (HSSFWorkbook) visitorValue.getSheet().getWorkbook();
-		HSSFPalette palette = book.getCustomPalette();
-		HSSFColor color = palette.getColor(colorIndex);
-		visitCellColor(column, color);
+	public void visitCellColor(Column column, short colorIndex, CellVisitor visitor) {
+		Color color = getHssfColor(colorIndex);
+		visitCellColor(column, color, visitor);
 	}
 
-	public void visitCellColor(Column column, Color color) {
+	public void visitCellColor(Column column, Color color, CellVisitor visitor) {
 		int rgb = getRGB(color);
 		if (rgb < 0) {
+			PageBuilder pageBuilder = visitorValue.getPageBuilder();
 			pageBuilder.setNull(column);
 			return;
 		}
 
 		if (column.getType() instanceof StringType) {
 			String s = String.format("%06x", rgb);
-			pageBuilder.setString(column, s);
+			visitor.visitCellValueString(column, color, s);
 		} else {
-			pageBuilder.setLong(column, rgb);
+			visitor.visitValueLong(column, color, rgb);
 		}
 	}
 
-	public static Color getColor(Workbook workbook, short colorIndex) {
+	public Color getHssfColor(short colorIndex) {
+		HSSFWorkbook book = (HSSFWorkbook) visitorValue.getSheet().getWorkbook();
+		return getHssfColor(book, colorIndex);
+	}
+
+	public static Color getHssfColor(Workbook workbook, short colorIndex) {
 		HSSFWorkbook book = (HSSFWorkbook) workbook;
 		HSSFPalette palette = book.getCustomPalette();
 		HSSFColor color = palette.getColor(colorIndex);

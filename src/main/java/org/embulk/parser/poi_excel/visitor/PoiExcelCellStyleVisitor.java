@@ -90,7 +90,7 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 				} else {
 					Workbook book = cell.getSheet().getWorkbook();
 					short color = style.getBottomBorderColor();
-					return PoiExcelColorVisitor.getColor(book, color);
+					return PoiExcelColorVisitor.getHssfColor(book, color);
 				}
 			}
 		});
@@ -102,7 +102,7 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 				} else {
 					Workbook book = cell.getSheet().getWorkbook();
 					short color = style.getLeftBorderColor();
-					return PoiExcelColorVisitor.getColor(book, color);
+					return PoiExcelColorVisitor.getHssfColor(book, color);
 				}
 			}
 		});
@@ -114,7 +114,7 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 				} else {
 					Workbook book = cell.getSheet().getWorkbook();
 					short color = style.getRightBorderColor();
-					return PoiExcelColorVisitor.getColor(book, color);
+					return PoiExcelColorVisitor.getHssfColor(book, color);
 				}
 			}
 		});
@@ -126,7 +126,7 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 				} else {
 					Workbook book = cell.getSheet().getWorkbook();
 					short color = style.getTopBorderColor();
-					return PoiExcelColorVisitor.getColor(book, color);
+					return PoiExcelColorVisitor.getHssfColor(book, color);
 				}
 			}
 		});

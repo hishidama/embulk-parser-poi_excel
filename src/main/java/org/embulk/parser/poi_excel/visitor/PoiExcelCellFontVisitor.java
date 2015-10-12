@@ -72,7 +72,7 @@ public class PoiExcelCellFontVisitor extends AbstractPoiExcelCellAttributeVisito
 				} else {
 					Workbook book = cell.getSheet().getWorkbook();
 					short color = font.getColor();
-					return PoiExcelColorVisitor.getColor(book, color);
+					return PoiExcelColorVisitor.getHssfColor(book, color);
 				}
 			}
 		});
