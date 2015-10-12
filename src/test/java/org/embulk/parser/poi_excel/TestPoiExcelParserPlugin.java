@@ -1,7 +1,6 @@
 package org.embulk.parser.poi_excel;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.net.URL;
@@ -184,23 +183,5 @@ public class TestPoiExcelParserPlugin {
 		// System.out.println(r);
 		assertThat(r.getAsString("a"), is(a));
 		assertThat(r.getAsString("b"), is(b));
-	}
-
-	@Test
-	public void testComment() throws ParseException {
-		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
-			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
-
-			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
-			parser.set("sheet", "comment");
-			parser.addColumn("comment", "string").set("value_type", "cell_comment");
-
-			URL inFile = getClass().getResource("test1.xls");
-			List<OutputRecord> result = tester.runParser(inFile, parser);
-
-			assertThat(result.size(), is(2));
-			assertThat(result.get(0).getAsString("comment"), is("hishidama:\nコメント"));
-			assertThat(result.get(1).getAsString("comment"), is(nullValue()));
-		}
 	}
 }

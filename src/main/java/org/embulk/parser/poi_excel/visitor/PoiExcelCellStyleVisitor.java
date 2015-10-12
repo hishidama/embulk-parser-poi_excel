@@ -1,17 +1,11 @@
 package org.embulk.parser.poi_excel.visitor;
 
-import java.text.MessageFormat;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Color;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
@@ -29,46 +23,29 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 		return cell.getCellStyle();
 	}
 
-	@Override
-	protected Collection<String> geyAllKeys() {
-		return ALL_KEYS;
-	}
-
-	@Override
-	protected Object getAttributeValue(Column column, ColumnOptionTask option, Cell cell, CellStyle style, String key) {
-		CellStyleSupplier supplier = STYLE_MAP.get(key.toLowerCase());
-		if (supplier == null) {
-			throw new UnsupportedOperationException(MessageFormat.format(
-					"unsupported cell style name={0}, choose in {1}", key, new TreeSet<>(STYLE_MAP.keySet())));
+	protected boolean acceptKey(String key) {
+		if (key.equals("border")) {
+			return false;
 		}
-		Object value = supplier.get(column, cell, style);
-		if (value instanceof Color) {
-			int rgb = PoiExcelColorVisitor.getRGB((Color) value);
-			if (column.getType() instanceof StringType) {
-				value = String.format("%06x", rgb);
-			} else {
-				value = (long) rgb;
-			}
-		}
-		return value;
+		return true;
 	}
 
-	protected static interface CellStyleSupplier {
-		public Object get(Column column, Cell cell, CellStyle style);
+	@Override
+	protected Map<String, AttributeSupplier<CellStyle>> getAttributeSupplierMap() {
+		return SUPPLIER_MAP;
 	}
 
-	protected static final Map<String, CellStyleSupplier> STYLE_MAP;
-	protected static final Set<String> ALL_KEYS;
+	protected static final Map<String, AttributeSupplier<CellStyle>> SUPPLIER_MAP;
 
 	static {
-		Map<String, CellStyleSupplier> map = new HashMap<>(32);
-		map.put("alignment", new CellStyleSupplier() {
+		Map<String, AttributeSupplier<CellStyle>> map = new HashMap<>(32);
+		map.put("alignment", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				return (long) style.getAlignment();
 			}
 		});
-		map.put("border", new CellStyleSupplier() {
+		map.put("border", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				int n0 = style.getBorderTop();
@@ -81,31 +58,31 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 				return (long) ((n0 << 24) | (n1 << 16) | (n2 << 8) | n3);
 			}
 		});
-		map.put("border_bottom", new CellStyleSupplier() {
+		map.put("border_bottom", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				return (long) style.getBorderBottom();
 			}
 		});
-		map.put("border_left", new CellStyleSupplier() {
+		map.put("border_left", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				return (long) style.getBorderLeft();
 			}
 		});
-		map.put("border_right", new CellStyleSupplier() {
+		map.put("border_right", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				return (long) style.getBorderRight();
 			}
 		});
-		map.put("border_top", new CellStyleSupplier() {
+		map.put("border_top", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				return (long) style.getBorderTop();
 			}
 		});
-		map.put("border_bottom_color", new CellStyleSupplier() {
+		map.put("border_bottom_color", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				if (style instanceof XSSFCellStyle) {
@@ -117,7 +94,7 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 				}
 			}
 		});
-		map.put("border_left_color", new CellStyleSupplier() {
+		map.put("border_left_color", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				if (style instanceof XSSFCellStyle) {
@@ -129,7 +106,7 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 				}
 			}
 		});
-		map.put("border_right_color", new CellStyleSupplier() {
+		map.put("border_right_color", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				if (style instanceof XSSFCellStyle) {
@@ -141,7 +118,7 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 				}
 			}
 		});
-		map.put("border_top_color", new CellStyleSupplier() {
+		map.put("border_top_color", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				if (style instanceof XSSFCellStyle) {
@@ -153,7 +130,7 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 				}
 			}
 		});
-		map.put("data_format", new CellStyleSupplier() {
+		map.put("data_format", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				if (column.getType() instanceof StringType) {
@@ -163,70 +140,66 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 				}
 			}
 		});
-		map.put("fill_background_color", new CellStyleSupplier() {
+		map.put("fill_background_color", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				return style.getFillBackgroundColorColor();
 			}
 		});
-		map.put("fill_foreground_color", new CellStyleSupplier() {
+		map.put("fill_foreground_color", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				return style.getFillForegroundColorColor();
 			}
 		});
-		map.put("fill_pattern", new CellStyleSupplier() {
+		map.put("fill_pattern", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				return (long) style.getFillPattern();
 			}
 		});
-		map.put("font_index", new CellStyleSupplier() {
+		map.put("font_index", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				return (long) style.getFontIndex();
 			}
 		});
-		map.put("hidden", new CellStyleSupplier() {
+		map.put("hidden", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				return style.getHidden();
 			}
 		});
-		map.put("indention", new CellStyleSupplier() {
+		map.put("indention", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				return (long) style.getIndention();
 			}
 		});
-		map.put("locked", new CellStyleSupplier() {
+		map.put("locked", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				return style.getLocked();
 			}
 		});
-		map.put("rotation", new CellStyleSupplier() {
+		map.put("rotation", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				return (long) style.getRotation();
 			}
 		});
-		map.put("vertical_alignment", new CellStyleSupplier() {
+		map.put("vertical_alignment", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				return (long) style.getVerticalAlignment();
 			}
 		});
-		map.put("wrap_text", new CellStyleSupplier() {
+		map.put("wrap_text", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
 				return style.getWrapText();
 			}
 		});
-		STYLE_MAP = Collections.unmodifiableMap(map);
-
-		Set<String> set = new HashSet<String>(STYLE_MAP.keySet());
-		set.remove("border");
-		ALL_KEYS = Collections.unmodifiableSet(set);
+		SUPPLIER_MAP = Collections.unmodifiableMap(map);
 	}
 }

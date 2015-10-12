@@ -124,23 +124,23 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		pageBuilder.setNull(column);
 	}
 
-	protected void visitCellValue(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
-		PoiExcelCellVisitor delegator = new PoiExcelCellVisitor(visitorValue);
+	private void visitCellValue(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
+		PoiExcelCellVisitor delegator = factory.getPoiExcelCellVisitor();
 		delegator.visitCellValue(column, option, cell, visitor);
 	}
 
-	protected void visitCellStyle(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
+	private void visitCellStyle(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
 		PoiExcelCellStyleVisitor delegator = factory.getPoiExcelCellStyleVisitor();
 		delegator.visit(column, option, cell, visitor);
 	}
 
-	protected void visitCellFont(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
+	private void visitCellFont(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
 		PoiExcelCellFontVisitor delegator = factory.getPoiExcelCellFontVisitor();
 		delegator.visit(column, option, cell, visitor);
 	}
 
-	protected void visitCellComment(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
+	private void visitCellComment(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
 		PoiExcelCellCommentVisitor delegator = factory.getPoiExcelCellCommentVisitor();
-		delegator.visitCellComment(column, option, cell, visitor);
+		delegator.visit(column, option, cell, visitor);
 	}
 }
