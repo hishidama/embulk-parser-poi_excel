@@ -31,7 +31,7 @@ public class PoiExcelCellFontVisitor extends AbstractPoiExcelCellAttributeVisito
 		return SUPPLIER_MAP;
 	}
 
-	protected static final Map<String, AttributeSupplier<Font>> SUPPLIER_MAP;
+	private static final Map<String, AttributeSupplier<Font>> SUPPLIER_MAP;
 	static {
 		Map<String, AttributeSupplier<Font>> map = new HashMap<>(32);
 		map.put("font_name", new AttributeSupplier<Font>() {

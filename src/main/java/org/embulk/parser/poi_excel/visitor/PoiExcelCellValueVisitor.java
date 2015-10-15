@@ -23,13 +23,13 @@ import org.slf4j.Logger;
 
 import com.google.common.base.Optional;
 
-public class PoiExcelCellVisitor {
+public class PoiExcelCellValueVisitor {
 	private final Logger log = Exec.getLogger(getClass());
 
 	protected final PoiExcelVisitorValue visitorValue;
 	protected final PageBuilder pageBuilder;
 
-	public PoiExcelCellVisitor(PoiExcelVisitorValue visitorValue) {
+	public PoiExcelCellValueVisitor(PoiExcelVisitorValue visitorValue) {
 		this.visitorValue = visitorValue;
 		this.pageBuilder = visitorValue.getPageBuilder();
 	}

@@ -125,7 +125,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 	}
 
 	private void visitCellValue(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
-		PoiExcelCellVisitor delegator = factory.getPoiExcelCellVisitor();
+		PoiExcelCellValueVisitor delegator = factory.getPoiExcelCellValueVisitor();
 		delegator.visitCellValue(column, option, cell, visitor);
 	}
 

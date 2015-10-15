@@ -100,17 +100,17 @@ public class PoiExcelVisitorFactory {
 	}
 
 	// cell value/formula
-	private PoiExcelCellVisitor poiExcelCellVisitor;
+	private PoiExcelCellValueVisitor poiExcelCellValueVisitor;
 
-	public final PoiExcelCellVisitor getPoiExcelCellVisitor() {
-		if (poiExcelCellVisitor == null) {
-			poiExcelCellVisitor = newPoiExcelCellVisitor();
+	public final PoiExcelCellValueVisitor getPoiExcelCellValueVisitor() {
+		if (poiExcelCellValueVisitor == null) {
+			poiExcelCellValueVisitor = newPoiExcelCellValueVisitor();
 		}
-		return poiExcelCellVisitor;
+		return poiExcelCellValueVisitor;
 	}
 
-	protected PoiExcelCellVisitor newPoiExcelCellVisitor() {
-		return new PoiExcelCellVisitor(visitorValue);
+	protected PoiExcelCellValueVisitor newPoiExcelCellValueVisitor() {
+		return new PoiExcelCellValueVisitor(visitorValue);
 	}
 
 	// cell style
@@ -142,17 +142,31 @@ public class PoiExcelVisitorFactory {
 	}
 
 	// cell comment
-	private PoiExcelCellCommentVisitor PoiExcelCellCommentVisitor;
+	private PoiExcelCellCommentVisitor poiExcelCellCommentVisitor;
 
 	public final PoiExcelCellCommentVisitor getPoiExcelCellCommentVisitor() {
-		if (PoiExcelCellCommentVisitor == null) {
-			PoiExcelCellCommentVisitor = newPoiExcelCellCommentVisitor();
+		if (poiExcelCellCommentVisitor == null) {
+			poiExcelCellCommentVisitor = newPoiExcelCellCommentVisitor();
 		}
-		return PoiExcelCellCommentVisitor;
+		return poiExcelCellCommentVisitor;
 	}
 
 	protected PoiExcelCellCommentVisitor newPoiExcelCellCommentVisitor() {
 		return new PoiExcelCellCommentVisitor(visitorValue);
+	}
+
+	// ClientAnchor
+	private PoiExcelClientAnchorVisitor poiExcelClientAnchorVisitor;
+
+	public final PoiExcelClientAnchorVisitor getPoiExcelClientAnchorVisitor() {
+		if (poiExcelClientAnchorVisitor == null) {
+			poiExcelClientAnchorVisitor = newPoiExcelClientAnchorVisitor();
+		}
+		return poiExcelClientAnchorVisitor;
+	}
+
+	protected PoiExcelClientAnchorVisitor newPoiExcelClientAnchorVisitor() {
+		return new PoiExcelClientAnchorVisitor(visitorValue);
 	}
 
 	// color

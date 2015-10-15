@@ -35,8 +35,7 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 		return SUPPLIER_MAP;
 	}
 
-	protected static final Map<String, AttributeSupplier<CellStyle>> SUPPLIER_MAP;
-
+	private static final Map<String, AttributeSupplier<CellStyle>> SUPPLIER_MAP;
 	static {
 		Map<String, AttributeSupplier<CellStyle>> map = new HashMap<>(32);
 		map.put("alignment", new AttributeSupplier<CellStyle>() {

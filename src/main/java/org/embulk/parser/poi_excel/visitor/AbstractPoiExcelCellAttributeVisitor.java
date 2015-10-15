@@ -48,7 +48,7 @@ public abstract class AbstractPoiExcelCellAttributeVisitor<A> {
 	protected abstract A getAttributeSource(Column column, ColumnOptionTask option, Cell cell);
 
 	private void visitKey(Column column, ColumnOptionTask option, String key, Cell cell, A source, CellVisitor visitor) {
-		Object value = getAttributeValue(column, option, cell, source, key);
+		Object value = getAttributeValue(column, cell, source, key);
 		if (value == null) {
 			pageBuilder.setNull(column);
 		} else if (value instanceof String) {
@@ -59,6 +59,8 @@ public abstract class AbstractPoiExcelCellAttributeVisitor<A> {
 			visitor.visitCellValueBoolean(column, source, (Boolean) value);
 		} else if (value instanceof Double) {
 			visitor.visitCellValueNumeric(column, source, (Double) value);
+		} else if (value instanceof Map) {
+			visitor.visitCellValueString(column, source, convertJsonString(value));
 		} else {
 			throw new IllegalStateException(MessageFormat.format("unsupported conversion. type={0}, value={1}", value
 					.getClass().getName(), value));
@@ -70,41 +72,46 @@ public abstract class AbstractPoiExcelCellAttributeVisitor<A> {
 
 		Optional<List<String>> nameOption = option.getAttributeName();
 		if (nameOption.isPresent()) {
-			result = new LinkedHashMap<>();
-
 			List<String> list = nameOption.get();
-			for (String key : list) {
-				Object value = getAttributeValue(column, option, cell, source, key);
+			result = getSpecifiedValues(column, cell, source, list);
+		} else {
+			result = getAllValues(column, cell, source);
+		}
+
+		String json = convertJsonString(result);
+		visitor.visitCellValueString(column, cell, json);
+	}
+
+	protected final Map<String, Object> getSpecifiedValues(Column column, Cell cell, A source, List<String> keyList) {
+		Map<String, Object> result = new LinkedHashMap<>();
+
+		for (String key : keyList) {
+			Object value = getAttributeValue(column, cell, source, key);
+			result.put(key, value);
+		}
+
+		return result;
+	}
+
+	protected final Map<String, Object> getAllValues(Column column, Cell cell, A source) {
+		Map<String, Object> result = new TreeMap<>();
+
+		Collection<String> keys = getAttributeSupplierMap().keySet();
+		for (String key : keys) {
+			if (acceptKey(key)) {
+				Object value = getAttributeValue(column, cell, source, key);
 				result.put(key, value);
 			}
-		} else {
-			result = new TreeMap<>();
-
-			Collection<String> keys = getAttributeSupplierMap().keySet();
-			for (String key : keys) {
-				if (acceptKey(key)) {
-					Object value = getAttributeValue(column, option, cell, source, key);
-					result.put(key, value);
-				}
-			}
 		}
 
-		String json;
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			json = mapper.writeValueAsString(result);
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
-
-		visitor.visitCellValueString(column, cell, json);
+		return result;
 	}
 
 	protected boolean acceptKey(String key) {
 		return true;
 	}
 
-	private Object getAttributeValue(Column column, ColumnOptionTask option, Cell cell, A source, String key) {
+	protected final Object getAttributeValue(Column column, Cell cell, A source, String key) {
 		Map<String, AttributeSupplier<A>> map = getAttributeSupplierMap();
 		AttributeSupplier<A> supplier = map.get(key.toLowerCase());
 		if (supplier == null) {
@@ -130,4 +137,13 @@ public abstract class AbstractPoiExcelCellAttributeVisitor<A> {
 	}
 
 	protected abstract Map<String, AttributeSupplier<A>> getAttributeSupplierMap();
+
+	protected final String convertJsonString(Object result) {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			return mapper.writeValueAsString(result);
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
+	}
 }

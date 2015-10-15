@@ -169,12 +169,12 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		int skipHeaderLines = task.getSkipHeaderLines();
 		final int flushCount = task.getFlushCount();
 
-		try (final PageBuilder pageBuilder = new PageBuilder(Exec.getBufferAllocator(), schema, output)) {
+		try (PageBuilder pageBuilder = new PageBuilder(Exec.getBufferAllocator(), schema, output)) {
 			PoiExcelVisitorFactory factory = newPoiExcelVisitorFactory(task, sheet, pageBuilder);
 			PoiExcelColumnVisitor visitor = factory.getPoiExcelColumnVisitor();
 
 			int count = 0;
-			for (final Row row : sheet) {
+			for (Row row : sheet) {
 				if (row.getRowNum() < skipHeaderLines) {
 					continue;
 				}
