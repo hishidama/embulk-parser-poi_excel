@@ -10,7 +10,7 @@ This plugin uses Apache POI.
 
 ## Configuration
 
-* **sheet**: sheet name. (string, default: `Sheet1`)
+* **sheets**: sheet name. (list of string, required)
 * **skip_header_lines**: skip rows. (integer, default: `0`)
 * **columns**: column definition. see below. (hash, required)
 
@@ -87,7 +87,7 @@ in:
   type: any file input plugin type
   parser:
     type: poi_excel
-    sheet: "DQ10-orb"
+    sheets: ["DQ10-orb"]
     skip_header_lines: 1	# first row is header.
     columns:
     - {name: row, type: long, value: row_number}

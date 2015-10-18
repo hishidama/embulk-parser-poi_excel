@@ -25,7 +25,7 @@ public class TestPoiExcelParserPlugin {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
 			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
-			parser.set("sheet", "test1");
+			parser.set("sheets", Arrays.asList("test1"));
 			parser.set("skip_header_lines", 1);
 			parser.set("default_timezone", "Asia/Tokyo");
 			parser.addColumn("boolean", "boolean");
@@ -73,7 +73,7 @@ public class TestPoiExcelParserPlugin {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
 			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
-			parser.set("sheet", "test1");
+			parser.set("sheets", Arrays.asList("test1"));
 			parser.set("skip_header_lines", 1);
 			parser.set("cell_error_null", false);
 			parser.addColumn("sheet", "string").set("value", "sheet_name");
@@ -183,5 +183,25 @@ public class TestPoiExcelParserPlugin {
 		// System.out.println(r);
 		assertThat(r.getAsString("a"), is(a));
 		assertThat(r.getAsString("b"), is(b));
+	}
+
+	@Test
+	public void test_sheets() throws ParseException {
+		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
+			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
+
+			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
+			parser.set("sheets", Arrays.asList("formula_replace", "merged_cell"));
+			parser.addColumn("a", "string");
+
+			URL inFile = getClass().getResource("test1.xls");
+			List<OutputRecord> result = tester.runParser(inFile, parser);
+
+			assertThat(result.size(), is(2 + 4));
+			assertThat(result.get(0).getAsString("a"), is("boolean"));
+			assertThat(result.get(1).getAsString("a"), is("test2-b1"));
+			assertThat(result.get(2).getAsString("a"), is("test3-a1"));
+			assertThat(result.get(3).getAsString("a"), is("data"));
+		}
 	}
 }

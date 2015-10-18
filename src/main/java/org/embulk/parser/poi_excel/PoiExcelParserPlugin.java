@@ -1,6 +1,7 @@
 package org.embulk.parser.poi_excel;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.poi.EncryptedDocumentException;
@@ -11,6 +12,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.embulk.config.Config;
 import org.embulk.config.ConfigDefault;
+import org.embulk.config.ConfigException;
 import org.embulk.config.ConfigSource;
 import org.embulk.config.Task;
 import org.embulk.config.TaskSource;
@@ -26,18 +28,28 @@ import org.embulk.spi.Schema;
 import org.embulk.spi.SchemaConfig;
 import org.embulk.spi.time.TimestampParser;
 import org.embulk.spi.util.FileInputInputStream;
+import org.slf4j.Logger;
 
 import com.google.common.base.Optional;
 import com.ibm.icu.text.MessageFormat;
 
 public class PoiExcelParserPlugin implements ParserPlugin {
+	private final Logger log = Exec.getLogger(getClass());
 
 	public static final String TYPE = "poi_excel";
 
 	public interface PluginTask extends Task, TimestampParser.Task {
 		@Config("sheet")
-		@ConfigDefault("\"Sheet1\"")
-		public String getSheet();
+		@ConfigDefault("null")
+		public Optional<String> getSheet();
+
+		@Config("sheets")
+		@ConfigDefault("[]")
+		public List<String> getSheets();
+
+		@Config("ignore_sheet_not_found")
+		@ConfigDefault("false")
+		public boolean getIgnoreSheetNotFound();
 
 		@Config("skip_header_lines")
 		@ConfigDefault("0")
@@ -145,6 +157,16 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 	public void run(TaskSource taskSource, Schema schema, FileInput input, PageOutput output) {
 		PluginTask task = taskSource.loadTask(PluginTask.class);
 
+		List<String> sheetNames = new ArrayList<>();
+		Optional<String> sheetOption = task.getSheet();
+		if (sheetOption.isPresent()) {
+			sheetNames.add(sheetOption.get());
+		}
+		sheetNames.addAll(task.getSheets());
+		if (sheetNames.isEmpty()) {
+			throw new ConfigException("Attribute sheets is required but not set");
+		}
+
 		try (FileInputInputStream is = new FileInputInputStream(input)) {
 			while (is.nextFile()) {
 				Workbook workbook;
@@ -154,39 +176,47 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 					throw new RuntimeException(e);
 				}
 
-				String sheetName = task.getSheet();
-				Sheet sheet = workbook.getSheet(sheetName);
-				if (sheet == null) {
-					throw new RuntimeException(MessageFormat.format("not found sheet={0}", sheetName));
-				}
-
-				run(task, schema, sheet, output);
+				run(task, schema, workbook, sheetNames, output);
 			}
 		}
 	}
 
-	protected void run(PluginTask task, Schema schema, Sheet sheet, PageOutput output) {
+	protected void run(PluginTask task, Schema schema, Workbook workbook, List<String> sheetNames, PageOutput output) {
 		int skipHeaderLines = task.getSkipHeaderLines();
 		final int flushCount = task.getFlushCount();
 
 		try (PageBuilder pageBuilder = new PageBuilder(Exec.getBufferAllocator(), schema, output)) {
-			PoiExcelVisitorFactory factory = newPoiExcelVisitorFactory(task, sheet, pageBuilder);
-			PoiExcelColumnVisitor visitor = factory.getPoiExcelColumnVisitor();
-
-			int count = 0;
-			for (Row row : sheet) {
-				if (row.getRowNum() < skipHeaderLines) {
-					continue;
+			for (String sheetName : sheetNames) {
+				Sheet sheet = workbook.getSheet(sheetName);
+				if (sheet == null) {
+					if (task.getIgnoreSheetNotFound()) {
+						log.info("ignore: not found sheet={}", sheetName);
+						continue;
+					} else {
+						throw new RuntimeException(MessageFormat.format("not found sheet={0}", sheetName));
+					}
 				}
 
-				visitor.setRow(row);
-				schema.visitColumns(visitor);
-				pageBuilder.addRecord();
+				log.info("sheet={}", sheetName);
+				PoiExcelVisitorFactory factory = newPoiExcelVisitorFactory(task, sheet, pageBuilder);
+				PoiExcelColumnVisitor visitor = factory.getPoiExcelColumnVisitor();
 
-				if (++count >= flushCount) {
-					pageBuilder.flush();
-					count = 0;
+				int count = 0;
+				for (Row row : sheet) {
+					if (row.getRowNum() < skipHeaderLines) {
+						continue;
+					}
+
+					visitor.setRow(row);
+					schema.visitColumns(visitor);
+					pageBuilder.addRecord();
+
+					if (++count >= flushCount) {
+						pageBuilder.flush();
+						count = 0;
+					}
 				}
+				pageBuilder.flush();
 			}
 			pageBuilder.finish();
 		}
