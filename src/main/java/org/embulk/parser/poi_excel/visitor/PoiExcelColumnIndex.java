@@ -54,6 +54,8 @@ public class PoiExcelColumnIndex {
 						CellReference.convertNumToColString(index), valueType);
 				option.setColumnIndex(index);
 				indexMap.put(column.getName(), index);
+			} else {
+				log.info("column.name={} <- value_type={}", column.getName(), valueType);
 			}
 		}
 	}
