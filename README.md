@@ -32,6 +32,7 @@ This plugin uses Apache POI.
 * `sheet_name`: sheet name.
 * `row_number`: row number(1 origin).
 * `column_number`: column number(1 origin).
+* `empty`: always null.
 
 ### column_number
 

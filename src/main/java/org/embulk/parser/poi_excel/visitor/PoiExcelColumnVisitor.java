@@ -91,6 +91,9 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		case COLUMN_NUMBER:
 			visitor.visitColumnNumber(column, option.getColumnIndex() + 1);
 			return;
+		case EMPTY:
+			pageBuilder.setNull(column);
+			return;
 		default:
 			break;
 		}
