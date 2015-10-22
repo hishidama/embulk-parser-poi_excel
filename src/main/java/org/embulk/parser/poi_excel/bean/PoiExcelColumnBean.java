@@ -28,12 +28,13 @@ public class PoiExcelColumnBean {
 			ColumnOptionTask optionTask) {
 		this.sheetBean = sheetBean;
 		this.column = column;
+
 		if (optionTask != null) {
 			columnTaskList.add(optionTask);
-			allTaskList.add(optionTask);
 		}
 		columnTaskList.add(mainTask);
-		allTaskList.add(mainTask);
+
+		allTaskList.addAll(columnTaskList);
 		allTaskList.addAll(sheetBean.getSheetOption());
 
 		initialize();

@@ -18,25 +18,20 @@ import com.google.common.base.Optional;
 
 public class PoiExcelSheetBean {
 
-	protected final PluginTask task;
-	protected final Schema schema;
 	protected final Sheet sheet;
 
-	private List<SheetOptionTask> sheetTaskList;
+	private final List<SheetOptionTask> sheetTaskList = new ArrayList<>(2);
 
-	private List<PoiExcelColumnBean> columnBeanList;
+	private final List<PoiExcelColumnBean> columnBeanList = new ArrayList<>();
 
 	public PoiExcelSheetBean(PluginTask task, Schema schema, Sheet sheet) {
-		this.task = task;
-		this.schema = schema;
 		this.sheet = sheet;
 
-		initializeSheetTask();
-		initializeColumnBean();
+		initializeSheetTask(task);
+		initializeColumnBean(task, schema);
 	}
 
-	private void initializeSheetTask() {
-		sheetTaskList = new ArrayList<>(2);
+	private void initializeSheetTask(PluginTask task) {
 		String name = sheet.getSheetName();
 		Map<String, SheetOptionTask> map = task.getSheetOptions();
 		SheetOptionTask s = map.get(name);
@@ -56,9 +51,8 @@ public class PoiExcelSheetBean {
 		sheetTaskList.add(task);
 	}
 
-	private void initializeColumnBean() {
+	private void initializeColumnBean(PluginTask task, Schema schema) {
 		List<ColumnConfig> list = task.getColumns().getColumns();
-		columnBeanList = new ArrayList<>(list.size());
 
 		Map<String, ColumnOptionTask> map = new HashMap<>();
 		List<SheetOptionTask> slist = getSheetOption();
