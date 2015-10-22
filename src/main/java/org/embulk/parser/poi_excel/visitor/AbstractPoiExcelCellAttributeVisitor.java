@@ -29,24 +29,26 @@ public abstract class AbstractPoiExcelCellAttributeVisitor<A> {
 		this.pageBuilder = visitorValue.getPageBuilder();
 	}
 
-	public void visit(Column column, PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
-		A source = getAttributeSource(column, bean, cell);
+	public void visit(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
+		A source = getAttributeSource(bean, cell);
 		if (source == null) {
+			Column column = bean.getColumn();
 			pageBuilder.setNull(column);
 			return;
 		}
 
 		String suffix = bean.getValueTypeSuffix();
 		if (suffix != null) {
-			visitKey(column, bean, suffix, cell, source, visitor);
+			visitKey(bean, suffix, cell, source, visitor);
 		} else {
-			visitJson(column, bean, cell, source, visitor);
+			visitJson(bean, cell, source, visitor);
 		}
 	}
 
-	protected abstract A getAttributeSource(Column column, PoiExcelColumnBean bean, Cell cell);
+	protected abstract A getAttributeSource(PoiExcelColumnBean bean, Cell cell);
 
-	private void visitKey(Column column, PoiExcelColumnBean bean, String key, Cell cell, A source, CellVisitor visitor) {
+	private void visitKey(PoiExcelColumnBean bean, String key, Cell cell, A source, CellVisitor visitor) {
+		Column column = bean.getColumn();
 		Object value = getAttributeValue(column, cell, source, key);
 		if (value == null) {
 			pageBuilder.setNull(column);
@@ -66,7 +68,9 @@ public abstract class AbstractPoiExcelCellAttributeVisitor<A> {
 		}
 	}
 
-	private void visitJson(Column column, PoiExcelColumnBean bean, Cell cell, A source, CellVisitor visitor) {
+	private void visitJson(PoiExcelColumnBean bean, Cell cell, A source, CellVisitor visitor) {
+		Column column = bean.getColumn();
+
 		Map<String, Object> result;
 
 		List<String> list = bean.getAttributeName();

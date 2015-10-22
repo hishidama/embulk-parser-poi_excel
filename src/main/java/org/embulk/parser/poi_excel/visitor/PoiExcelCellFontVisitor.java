@@ -19,7 +19,7 @@ public class PoiExcelCellFontVisitor extends AbstractPoiExcelCellAttributeVisito
 	}
 
 	@Override
-	protected Font getAttributeSource(Column column, PoiExcelColumnBean bean, Cell cell) {
+	protected Font getAttributeSource(PoiExcelColumnBean bean, Cell cell) {
 		CellStyle style = cell.getCellStyle();
 		short index = style.getFontIndex();
 		Workbook book = visitorValue.getSheet().getWorkbook();

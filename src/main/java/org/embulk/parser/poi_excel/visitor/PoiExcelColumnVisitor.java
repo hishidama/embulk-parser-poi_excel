@@ -97,16 +97,16 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		switch (valueType) {
 		case CELL_VALUE:
 		case CELL_FORMULA:
-			visitCellValue(column, bean, cell, visitor);
+			visitCellValue(bean, cell, visitor);
 			return;
 		case CELL_STYLE:
-			visitCellStyle(column, bean, cell, visitor);
+			visitCellStyle(bean, cell, visitor);
 			return;
 		case CELL_FONT:
-			visitCellFont(column, bean, cell, visitor);
+			visitCellFont(bean, cell, visitor);
 			return;
 		case CELL_COMMENT:
-			visitCellComment(column, bean, cell, visitor);
+			visitCellComment(bean, cell, visitor);
 			return;
 		default:
 			throw new UnsupportedOperationException(MessageFormat.format("unsupported value_type={0}", valueType));
@@ -117,23 +117,23 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		pageBuilder.setNull(column);
 	}
 
-	private void visitCellValue(Column column, PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
+	private void visitCellValue(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		PoiExcelCellValueVisitor delegator = factory.getPoiExcelCellValueVisitor();
-		delegator.visitCellValue(column, bean, cell, visitor);
+		delegator.visitCellValue(bean, cell, visitor);
 	}
 
-	private void visitCellStyle(Column column, PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
+	private void visitCellStyle(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		PoiExcelCellStyleVisitor delegator = factory.getPoiExcelCellStyleVisitor();
-		delegator.visit(column, bean, cell, visitor);
+		delegator.visit(bean, cell, visitor);
 	}
 
-	private void visitCellFont(Column column, PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
+	private void visitCellFont(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		PoiExcelCellFontVisitor delegator = factory.getPoiExcelCellFontVisitor();
-		delegator.visit(column, bean, cell, visitor);
+		delegator.visit(bean, cell, visitor);
 	}
 
-	private void visitCellComment(Column column, PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
+	private void visitCellComment(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		PoiExcelCellCommentVisitor delegator = factory.getPoiExcelCellCommentVisitor();
-		delegator.visit(column, bean, cell, visitor);
+		delegator.visit(bean, cell, visitor);
 	}
 }

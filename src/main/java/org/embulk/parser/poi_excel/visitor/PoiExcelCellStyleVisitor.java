@@ -19,7 +19,7 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 	}
 
 	@Override
-	protected CellStyle getAttributeSource(Column column, PoiExcelColumnBean bean, Cell cell) {
+	protected CellStyle getAttributeSource(PoiExcelColumnBean bean, Cell cell) {
 		return cell.getCellStyle();
 	}
 

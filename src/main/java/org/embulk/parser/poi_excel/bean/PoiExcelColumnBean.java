@@ -67,6 +67,10 @@ public class PoiExcelColumnBean {
 		}
 	}
 
+	public Column getColumn() {
+		return column;
+	}
+
 	public PoiExcelColumnValueType getValueType() {
 		return valueType;
 	}

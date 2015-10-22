@@ -25,7 +25,7 @@ public class PoiExcelClientAnchorVisitor extends AbstractPoiExcelCellAttributeVi
 	}
 
 	@Override
-	protected ClientAnchor getAttributeSource(Column column, PoiExcelColumnBean bean, Cell cell) {
+	protected ClientAnchor getAttributeSource(PoiExcelColumnBean bean, Cell cell) {
 		throw new UnsupportedOperationException();
 	}
 

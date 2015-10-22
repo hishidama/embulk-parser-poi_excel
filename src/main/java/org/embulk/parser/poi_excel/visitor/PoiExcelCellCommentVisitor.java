@@ -18,7 +18,7 @@ public class PoiExcelCellCommentVisitor extends AbstractPoiExcelCellAttributeVis
 	}
 
 	@Override
-	protected Comment getAttributeSource(Column column, PoiExcelColumnBean bean, Cell cell) {
+	protected Comment getAttributeSource(PoiExcelColumnBean bean, Cell cell) {
 		return cell.getCellComment();
 	}
 
