@@ -10,7 +10,7 @@ import java.util.TreeSet;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Color;
-import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
+import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
 import org.embulk.parser.poi_excel.visitor.embulk.CellVisitor;
 import org.embulk.spi.Column;
 import org.embulk.spi.PageBuilder;
@@ -18,7 +18,6 @@ import org.embulk.spi.type.StringType;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Optional;
 
 public abstract class AbstractPoiExcelCellAttributeVisitor<A> {
 
@@ -30,24 +29,24 @@ public abstract class AbstractPoiExcelCellAttributeVisitor<A> {
 		this.pageBuilder = visitorValue.getPageBuilder();
 	}
 
-	public void visit(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
-		A source = getAttributeSource(column, option, cell);
+	public void visit(Column column, PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
+		A source = getAttributeSource(column, bean, cell);
 		if (source == null) {
 			pageBuilder.setNull(column);
 			return;
 		}
 
-		String suffix = option.getValueTypeSuffix();
+		String suffix = bean.getValueTypeSuffix();
 		if (suffix != null) {
-			visitKey(column, option, suffix, cell, source, visitor);
+			visitKey(column, bean, suffix, cell, source, visitor);
 		} else {
-			visitJson(column, option, cell, source, visitor);
+			visitJson(column, bean, cell, source, visitor);
 		}
 	}
 
-	protected abstract A getAttributeSource(Column column, ColumnOptionTask option, Cell cell);
+	protected abstract A getAttributeSource(Column column, PoiExcelColumnBean bean, Cell cell);
 
-	private void visitKey(Column column, ColumnOptionTask option, String key, Cell cell, A source, CellVisitor visitor) {
+	private void visitKey(Column column, PoiExcelColumnBean bean, String key, Cell cell, A source, CellVisitor visitor) {
 		Object value = getAttributeValue(column, cell, source, key);
 		if (value == null) {
 			pageBuilder.setNull(column);
@@ -67,12 +66,11 @@ public abstract class AbstractPoiExcelCellAttributeVisitor<A> {
 		}
 	}
 
-	private void visitJson(Column column, ColumnOptionTask option, Cell cell, A source, CellVisitor visitor) {
+	private void visitJson(Column column, PoiExcelColumnBean bean, Cell cell, A source, CellVisitor visitor) {
 		Map<String, Object> result;
 
-		Optional<List<String>> nameOption = option.getAttributeName();
-		if (nameOption.isPresent()) {
-			List<String> list = nameOption.get();
+		List<String> list = bean.getAttributeName();
+		if (!list.isEmpty()) {
 			result = getSpecifiedValues(column, cell, source, list);
 		} else {
 			result = getAllValues(column, cell, source);

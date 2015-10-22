@@ -12,16 +12,13 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.embulk.parser.poi_excel.PoiExcelColumnValueType;
-import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.FormulaReplaceTask;
-import org.embulk.parser.poi_excel.PoiExcelParserPlugin.PluginTask;
+import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
 import org.embulk.parser.poi_excel.visitor.embulk.CellVisitor;
 import org.embulk.spi.Column;
 import org.embulk.spi.Exec;
 import org.embulk.spi.PageBuilder;
 import org.slf4j.Logger;
-
-import com.google.common.base.Optional;
 
 public class PoiExcelCellValueVisitor {
 	private final Logger log = Exec.getLogger(getClass());
@@ -34,7 +31,7 @@ public class PoiExcelCellValueVisitor {
 		this.pageBuilder = visitorValue.getPageBuilder();
 	}
 
-	public void visitCellValue(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
+	public void visitCellValue(Column column, PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		assert cell != null;
 
 		int cellType = cell.getCellType();
@@ -46,32 +43,31 @@ public class PoiExcelCellValueVisitor {
 			visitor.visitCellValueString(column, cell, cell.getStringCellValue());
 			return;
 		case Cell.CELL_TYPE_FORMULA:
-			PoiExcelColumnValueType valueType = option.getValueTypeEnum();
+			PoiExcelColumnValueType valueType = bean.getValueType();
 			if (valueType == PoiExcelColumnValueType.CELL_FORMULA) {
 				visitor.visitCellFormula(column, cell);
 			} else {
-				visitCellValueFormula(column, option, cell, visitor);
+				visitCellValueFormula(column, bean, cell, visitor);
 			}
 			return;
 		case Cell.CELL_TYPE_BLANK:
-			visitCellValueBlank(column, option, cell, visitor);
+			visitCellValueBlank(column, bean, cell, visitor);
 			return;
 		case Cell.CELL_TYPE_BOOLEAN:
 			visitor.visitCellValueBoolean(column, cell, cell.getBooleanCellValue());
 			return;
 		case Cell.CELL_TYPE_ERROR:
-			visitCellValueError(column, option, cell, cell.getErrorCellValue(), visitor);
+			visitCellValueError(column, bean, cell, cell.getErrorCellValue(), visitor);
 			return;
 		default:
 			throw new IllegalStateException(MessageFormat.format("unsupported POI cellType={0}", cellType));
 		}
 	}
 
-	protected void visitCellValueBlank(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
+	protected void visitCellValueBlank(Column column, PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		assert cell.getCellType() == Cell.CELL_TYPE_BLANK;
 
-		PluginTask task = visitorValue.getPluginTask();
-		boolean search = option.getSearchMergedCell().or(task.getSearchMergedCell());
+		boolean search = bean.getSearchMergedCell();
 		if (!search) {
 			visitor.visitCellValueBlank(column, cell);
 			return;
@@ -96,7 +92,7 @@ public class PoiExcelCellValueVisitor {
 					return;
 				}
 
-				visitCellValue(column, option, firstCell, visitor);
+				visitCellValue(column, bean, firstCell, visitor);
 				return;
 			}
 		}
@@ -104,19 +100,14 @@ public class PoiExcelCellValueVisitor {
 		visitor.visitCellValueBlank(column, cell);
 	}
 
-	protected void visitCellValueFormula(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
+	protected void visitCellValueFormula(Column column, PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		assert cell.getCellType() == Cell.CELL_TYPE_FORMULA;
 
-		Optional<List<FormulaReplaceTask>> replaceOption = option.getFormulaReplace();
-		if (!replaceOption.isPresent()) {
-			PluginTask task = visitorValue.getPluginTask();
-			replaceOption = task.getFormulaReplace();
-		}
-		if (replaceOption.isPresent()) {
+		List<FormulaReplaceTask> list = bean.getFormulaReplace();
+		if (!list.isEmpty()) {
 			String formula = cell.getCellFormula();
 			String old = formula;
 
-			List<FormulaReplaceTask> list = replaceOption.get();
 			for (FormulaReplaceTask replace : list) {
 				String regex = replace.getRegex();
 				String replacement = replace.getTo();
@@ -143,8 +134,7 @@ public class PoiExcelCellValueVisitor {
 			FormulaEvaluator evaluator = helper.createFormulaEvaluator();
 			cellValue = evaluator.evaluate(cell);
 		} catch (Exception e) {
-			PluginTask task = visitorValue.getPluginTask();
-			boolean setNull = option.getFormulaErrorNull().or(task.getFormulaErrorNull());
+			boolean setNull = bean.getFormulaErrorNull();
 			if (setNull) {
 				pageBuilder.setNull(column);
 				return;
@@ -168,7 +158,7 @@ public class PoiExcelCellValueVisitor {
 			visitor.visitCellValueBoolean(column, cellValue, cellValue.getBooleanValue());
 			return;
 		case Cell.CELL_TYPE_ERROR:
-			visitCellValueError(column, option, cellValue, cellValue.getErrorValue(), visitor);
+			visitCellValueError(column, bean, cellValue, cellValue.getErrorValue(), visitor);
 			return;
 		case Cell.CELL_TYPE_FORMULA:
 		default:
@@ -176,10 +166,9 @@ public class PoiExcelCellValueVisitor {
 		}
 	}
 
-	protected void visitCellValueError(Column column, ColumnOptionTask option, Object cell, int errorCode,
+	protected void visitCellValueError(Column column, PoiExcelColumnBean bean, Object cell, int errorCode,
 			CellVisitor visitor) {
-		PluginTask task = visitorValue.getPluginTask();
-		boolean setNull = option.getCellErrorNull().or(task.getCellErrorNull());
+		boolean setNull = bean.getCellErrorNull();
 		if (setNull) {
 			pageBuilder.setNull(column);
 			return;

@@ -8,7 +8,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
+import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
 import org.embulk.spi.Column;
 import org.embulk.spi.type.StringType;
 
@@ -19,7 +19,7 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 	}
 
 	@Override
-	protected CellStyle getAttributeSource(Column column, ColumnOptionTask option, Cell cell) {
+	protected CellStyle getAttributeSource(Column column, PoiExcelColumnBean bean, Cell cell) {
 		return cell.getCellStyle();
 	}
 

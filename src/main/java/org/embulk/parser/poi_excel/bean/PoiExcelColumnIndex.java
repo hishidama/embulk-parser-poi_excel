@@ -1,4 +1,4 @@
-package org.embulk.parser.poi_excel.visitor;
+package org.embulk.parser.poi_excel.bean;
 
 import java.text.MessageFormat;
 import java.util.LinkedHashMap;
@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.apache.poi.ss.util.CellReference;
 import org.embulk.parser.poi_excel.PoiExcelColumnValueType;
-import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.PluginTask;
 import org.embulk.spi.Column;
 import org.embulk.spi.Exec;
@@ -21,38 +20,23 @@ public class PoiExcelColumnIndex {
 
 	protected final Map<String, Integer> indexMap = new LinkedHashMap<>();
 
-	public void initializeColumnIndex(PluginTask task, List<ColumnOptionTask> columnOptions) {
+	public void initializeColumnIndex(PluginTask task, List<PoiExcelColumnBean> beanList) {
 		int index = -1;
 		indexMap.clear();
 
 		Schema schema = task.getColumns().toSchema();
 		for (Column column : schema.getColumns()) {
-			ColumnOptionTask option = columnOptions.get(column.getIndex());
-
-			String type = option.getValueType().trim();
-			int n = type.indexOf('.');
-			if (n >= 0) {
-				String suffix = type.substring(n + 1).trim();
-				option.setValueTypeSuffix(suffix);
-				type = type.substring(0, n).trim();
-			}
-
-			PoiExcelColumnValueType valueType;
-			try {
-				valueType = PoiExcelColumnValueType.valueOf(type.toUpperCase());
-			} catch (Exception e) {
-				throw new RuntimeException(MessageFormat.format("illegal value_type={0}", type), e);
-			}
-			option.setValueTypeEnum(valueType);
+			PoiExcelColumnBean bean = beanList.get(column.getIndex());
+			PoiExcelColumnValueType valueType = bean.getValueType();
 
 			if (valueType.useCell()) {
-				index = resolveColumnIndex(column, option, index, valueType);
+				index = resolveColumnIndex(column, bean, index, valueType);
 				if (index < 0) {
 					index = 0;
 				}
 				log.info("column.name={} <- cell column={}, value_type={}", column.getName(),
 						CellReference.convertNumToColString(index), valueType);
-				option.setColumnIndex(index);
+				bean.setColumnIndex(index);
 				indexMap.put(column.getName(), index);
 			} else {
 				log.info("column.name={} <- value_type={}", column.getName(), valueType);
@@ -60,9 +44,9 @@ public class PoiExcelColumnIndex {
 		}
 	}
 
-	protected int resolveColumnIndex(Column column, ColumnOptionTask option, int index,
+	protected int resolveColumnIndex(Column column, PoiExcelColumnBean bean, int index,
 			PoiExcelColumnValueType valueType) {
-		Optional<String> numberOption = option.getColumnNumber();
+		Optional<String> numberOption = bean.getColumnNumber();
 		if (numberOption.isPresent()) {
 			String columnNumber = numberOption.get();
 			if (columnNumber.length() >= 1) {

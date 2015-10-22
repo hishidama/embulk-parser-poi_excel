@@ -9,7 +9,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
+import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
 import org.embulk.spi.Column;
 
 public class PoiExcelCellFontVisitor extends AbstractPoiExcelCellAttributeVisitor<Font> {
@@ -19,7 +19,7 @@ public class PoiExcelCellFontVisitor extends AbstractPoiExcelCellAttributeVisito
 	}
 
 	@Override
-	protected Font getAttributeSource(Column column, ColumnOptionTask option, Cell cell) {
+	protected Font getAttributeSource(Column column, PoiExcelColumnBean bean, Cell cell) {
 		CellStyle style = cell.getCellStyle();
 		short index = style.getFontIndex();
 		Workbook book = visitorValue.getSheet().getWorkbook();

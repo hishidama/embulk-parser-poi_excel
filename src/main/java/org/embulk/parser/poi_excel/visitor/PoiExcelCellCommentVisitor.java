@@ -8,7 +8,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.Comment;
 import org.apache.poi.ss.usermodel.RichTextString;
-import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
+import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
 import org.embulk.spi.Column;
 
 public class PoiExcelCellCommentVisitor extends AbstractPoiExcelCellAttributeVisitor<Comment> {
@@ -18,7 +18,7 @@ public class PoiExcelCellCommentVisitor extends AbstractPoiExcelCellAttributeVis
 	}
 
 	@Override
-	protected Comment getAttributeSource(Column column, ColumnOptionTask option, Cell cell) {
+	protected Comment getAttributeSource(Column column, PoiExcelColumnBean bean, Cell cell) {
 		return cell.getCellComment();
 	}
 

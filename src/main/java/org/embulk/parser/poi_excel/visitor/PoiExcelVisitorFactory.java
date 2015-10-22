@@ -15,6 +15,10 @@ public class PoiExcelVisitorFactory {
 		visitorValue.setVisitorFactory(this);
 	}
 
+	public final PoiExcelVisitorValue getVisitorValue() {
+		return visitorValue;
+	}
+
 	// visitor root (Embulk ColumnVisitor)
 	private PoiExcelColumnVisitor poiExcelColumnVisitor;
 

@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
+import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
 import org.embulk.spi.Column;
 
 public class PoiExcelClientAnchorVisitor extends AbstractPoiExcelCellAttributeVisitor<ClientAnchor> {
@@ -25,7 +25,7 @@ public class PoiExcelClientAnchorVisitor extends AbstractPoiExcelCellAttributeVi
 	}
 
 	@Override
-	protected ClientAnchor getAttributeSource(Column column, ColumnOptionTask option, Cell cell) {
+	protected ClientAnchor getAttributeSource(Column column, PoiExcelColumnBean bean, Cell cell) {
 		throw new UnsupportedOperationException();
 	}
 

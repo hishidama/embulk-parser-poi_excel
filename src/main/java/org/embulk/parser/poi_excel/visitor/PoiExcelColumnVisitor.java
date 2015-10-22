@@ -1,14 +1,12 @@
 package org.embulk.parser.poi_excel.visitor;
 
 import java.text.MessageFormat;
-import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellReference;
 import org.embulk.parser.poi_excel.PoiExcelColumnValueType;
-import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
-import org.embulk.parser.poi_excel.PoiExcelParserPlugin.PluginTask;
+import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
 import org.embulk.parser.poi_excel.visitor.embulk.CellVisitor;
 import org.embulk.spi.Column;
 import org.embulk.spi.ColumnVisitor;
@@ -26,14 +24,6 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		this.visitorValue = visitorValue;
 		this.pageBuilder = visitorValue.getPageBuilder();
 		this.factory = visitorValue.getVisitorFactory();
-
-		initializeColumnOptions();
-	}
-
-	protected void initializeColumnOptions() {
-		PluginTask task = visitorValue.getPluginTask();
-		List<ColumnOptionTask> options = visitorValue.getColumnOptions();
-		new PoiExcelColumnIndex().initializeColumnIndex(task, options);
 	}
 
 	public void setRow(Row row) {
@@ -70,16 +60,16 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			visitCell(column, visitor);
 		} catch (Exception e) {
 			String sheetName = visitorValue.getSheet().getSheetName();
-			String ref = new CellReference(currentRow.getRowNum(), visitorValue.getColumnOption(column)
-					.getColumnIndex()).formatAsString();
+			String ref = new CellReference(currentRow.getRowNum(), visitorValue.getColumnBean(column).getColumnIndex())
+					.formatAsString();
 			throw new RuntimeException(MessageFormat.format("error at {0} cell={1}!{2}. {3}", column, sheetName, ref,
 					e.getMessage()), e);
 		}
 	}
 
 	protected void visitCell(Column column, CellVisitor visitor) {
-		ColumnOptionTask option = visitorValue.getColumnOption(column);
-		PoiExcelColumnValueType valueType = option.getValueTypeEnum();
+		PoiExcelColumnBean bean = visitorValue.getColumnBean(column);
+		PoiExcelColumnValueType valueType = bean.getValueType();
 
 		switch (valueType) {
 		case SHEET_NAME:
@@ -89,7 +79,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			visitor.visitRowNumber(column, currentRow.getRowNum() + 1);
 			return;
 		case COLUMN_NUMBER:
-			visitor.visitColumnNumber(column, option.getColumnIndex() + 1);
+			visitor.visitColumnNumber(column, bean.getColumnIndex() + 1);
 			return;
 		case EMPTY:
 			pageBuilder.setNull(column);
@@ -99,7 +89,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		}
 
 		assert valueType.useCell();
-		Cell cell = currentRow.getCell(option.getColumnIndex());
+		Cell cell = currentRow.getCell(bean.getColumnIndex());
 		if (cell == null) {
 			visitCellNull(column);
 			return;
@@ -107,16 +97,16 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		switch (valueType) {
 		case CELL_VALUE:
 		case CELL_FORMULA:
-			visitCellValue(column, option, cell, visitor);
+			visitCellValue(column, bean, cell, visitor);
 			return;
 		case CELL_STYLE:
-			visitCellStyle(column, option, cell, visitor);
+			visitCellStyle(column, bean, cell, visitor);
 			return;
 		case CELL_FONT:
-			visitCellFont(column, option, cell, visitor);
+			visitCellFont(column, bean, cell, visitor);
 			return;
 		case CELL_COMMENT:
-			visitCellComment(column, option, cell, visitor);
+			visitCellComment(column, bean, cell, visitor);
 			return;
 		default:
 			throw new UnsupportedOperationException(MessageFormat.format("unsupported value_type={0}", valueType));
@@ -127,23 +117,23 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		pageBuilder.setNull(column);
 	}
 
-	private void visitCellValue(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
+	private void visitCellValue(Column column, PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		PoiExcelCellValueVisitor delegator = factory.getPoiExcelCellValueVisitor();
-		delegator.visitCellValue(column, option, cell, visitor);
+		delegator.visitCellValue(column, bean, cell, visitor);
 	}
 
-	private void visitCellStyle(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
+	private void visitCellStyle(Column column, PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		PoiExcelCellStyleVisitor delegator = factory.getPoiExcelCellStyleVisitor();
-		delegator.visit(column, option, cell, visitor);
+		delegator.visit(column, bean, cell, visitor);
 	}
 
-	private void visitCellFont(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
+	private void visitCellFont(Column column, PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		PoiExcelCellFontVisitor delegator = factory.getPoiExcelCellFontVisitor();
-		delegator.visit(column, option, cell, visitor);
+		delegator.visit(column, bean, cell, visitor);
 	}
 
-	private void visitCellComment(Column column, ColumnOptionTask option, Cell cell, CellVisitor visitor) {
+	private void visitCellComment(Column column, PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		PoiExcelCellCommentVisitor delegator = factory.getPoiExcelCellCommentVisitor();
-		delegator.visit(column, option, cell, visitor);
+		delegator.visit(column, bean, cell, visitor);
 	}
 }

@@ -3,6 +3,7 @@ package org.embulk.parser.poi_excel;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -38,7 +39,7 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 
 	public static final String TYPE = "poi_excel";
 
-	public interface PluginTask extends Task, TimestampParser.Task {
+	public interface PluginTask extends Task, TimestampParser.Task, SheetOptionTask {
 		@Config("sheet")
 		@ConfigDefault("null")
 		public Optional<String> getSheet();
@@ -51,66 +52,49 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		@ConfigDefault("false")
 		public boolean getIgnoreSheetNotFound();
 
-		@Config("skip_header_lines")
-		@ConfigDefault("0")
-		public int getSkipHeaderLines();
-
-		// search merged cell if cellType=BLANK
-		@Config("search_merged_cell")
-		@ConfigDefault("true")
-		public boolean getSearchMergedCell();
-
-		@Config("formula_replace")
-		@ConfigDefault("null")
-		public Optional<List<FormulaReplaceTask>> getFormulaReplace();
-
-		// true: set null if formula error
-		// false: throw exception if formula error
-		@Config("formula_error_null")
-		@ConfigDefault("false")
-		public boolean getFormulaErrorNull();
-
-		// true: set null if cell value error
-		// false: set error code if cell value error
-		@Config("cell_error_null")
-		@ConfigDefault("true")
-		public boolean getCellErrorNull();
+		@Config("sheet_options")
+		@ConfigDefault("{}")
+		public Map<String, SheetOptionTask> getSheetOptions();
 
 		@Config("flush_count")
 		@ConfigDefault("100")
 		public int getFlushCount();
+	}
+
+	public interface SheetOptionTask extends Task, ColumnCommonOptionTask {
+
+		@Config("skip_header_lines")
+		@ConfigDefault("null")
+		public Optional<Integer> getSkipHeaderLines();
 
 		@Config("columns")
 		public SchemaConfig getColumns();
 	}
 
-	public interface ColumnOptionTask extends Task {
+	public interface ColumnOptionTask extends Task, ColumnCommonOptionTask {
 
 		/**
 		 * @see PoiExcelColumnValueType
 		 * @return value_type
 		 */
 		@Config("value")
-		@ConfigDefault("\"cell_value\"")
-		public String getValueType();
-
-		public void setValueTypeEnum(PoiExcelColumnValueType valueType);
-
-		public PoiExcelColumnValueType getValueTypeEnum();
-
-		public void setValueTypeSuffix(String suffix);
-
-		public String getValueTypeSuffix();
+		@ConfigDefault("null")
+		public Optional<String> getValueType();
 
 		// A,B,... or number(1 origin)
 		@Config("column_number")
 		@ConfigDefault("null")
 		public Optional<String> getColumnNumber();
 
-		public void setColumnIndex(int index);
+		// use when value_type=cell_style, cell_font, ...
+		@Config("attribute_name")
+		@ConfigDefault("null")
+		public Optional<List<String>> getAttributeName();
+	}
 
-		public int getColumnIndex();
+	public interface ColumnCommonOptionTask extends Task {
 
+		// search merged cell if cellType=BLANK
 		@Config("search_merged_cell")
 		@ConfigDefault("null")
 		public Optional<Boolean> getSearchMergedCell();
@@ -121,16 +105,17 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 
 		@Config("formula_error_null")
 		@ConfigDefault("null")
+		@Deprecated
 		public Optional<Boolean> getFormulaErrorNull();
 
 		@Config("cell_error_null")
 		@ConfigDefault("null")
+		@Deprecated
 		public Optional<Boolean> getCellErrorNull();
 
-		// use when value_type=cell_style, cell_font, ...
-		@Config("attribute_name")
-		@ConfigDefault("null")
-		public Optional<List<String>> getAttributeName();
+		@Config("on_error")
+		@ConfigDefault("{}")
+		public Map<String, String> getOnError();
 	}
 
 	public interface FormulaReplaceTask extends Task {
@@ -182,7 +167,6 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 	}
 
 	protected void run(PluginTask task, Schema schema, Workbook workbook, List<String> sheetNames, PageOutput output) {
-		int skipHeaderLines = task.getSkipHeaderLines();
 		final int flushCount = task.getFlushCount();
 
 		try (PageBuilder pageBuilder = new PageBuilder(Exec.getBufferAllocator(), schema, output)) {
@@ -198,8 +182,9 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 				}
 
 				log.info("sheet={}", sheetName);
-				PoiExcelVisitorFactory factory = newPoiExcelVisitorFactory(task, sheet, pageBuilder);
+				PoiExcelVisitorFactory factory = newPoiExcelVisitorFactory(task, schema, sheet, pageBuilder);
 				PoiExcelColumnVisitor visitor = factory.getPoiExcelColumnVisitor();
+				final int skipHeaderLines = factory.getVisitorValue().getSheetBean().getSkipHeaderLines();
 
 				int count = 0;
 				for (Row row : sheet) {
@@ -222,8 +207,9 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		}
 	}
 
-	protected PoiExcelVisitorFactory newPoiExcelVisitorFactory(PluginTask task, Sheet sheet, PageBuilder pageBuilder) {
-		PoiExcelVisitorValue visitorValue = new PoiExcelVisitorValue(task, sheet, pageBuilder);
+	protected PoiExcelVisitorFactory newPoiExcelVisitorFactory(PluginTask task, Schema schema, Sheet sheet,
+			PageBuilder pageBuilder) {
+		PoiExcelVisitorValue visitorValue = new PoiExcelVisitorValue(task, schema, sheet, pageBuilder);
 		return new PoiExcelVisitorFactory(visitorValue);
 	}
 }

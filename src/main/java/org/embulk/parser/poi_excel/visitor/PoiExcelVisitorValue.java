@@ -1,28 +1,25 @@
 package org.embulk.parser.poi_excel.visitor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.poi.ss.usermodel.Sheet;
-import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.PluginTask;
+import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
+import org.embulk.parser.poi_excel.bean.PoiExcelSheetBean;
 import org.embulk.spi.Column;
-import org.embulk.spi.ColumnConfig;
 import org.embulk.spi.PageBuilder;
-import org.embulk.spi.SchemaConfig;
+import org.embulk.spi.Schema;
 
 public class PoiExcelVisitorValue {
 	private final PluginTask task;
 	private final Sheet sheet;
 	private final PageBuilder pageBuilder;
+	private final PoiExcelSheetBean sheetBean;
 	private PoiExcelVisitorFactory factory;
 
-	private List<ColumnOptionTask> columnOptions;
-
-	public PoiExcelVisitorValue(PluginTask task, Sheet sheet, PageBuilder pageBuilder) {
+	public PoiExcelVisitorValue(PluginTask task, Schema schema, Sheet sheet, PageBuilder pageBuilder) {
 		this.task = task;
 		this.sheet = sheet;
 		this.pageBuilder = pageBuilder;
+		this.sheetBean = new PoiExcelSheetBean(task, schema, sheet);
 	}
 
 	public PluginTask getPluginTask() {
@@ -45,19 +42,11 @@ public class PoiExcelVisitorValue {
 		return factory;
 	}
 
-	public ColumnOptionTask getColumnOption(Column column) {
-		return getColumnOptions().get(column.getIndex());
+	public PoiExcelSheetBean getSheetBean() {
+		return sheetBean;
 	}
 
-	public List<ColumnOptionTask> getColumnOptions() {
-		if (columnOptions == null) {
-			SchemaConfig schemaConfig = task.getColumns();
-			columnOptions = new ArrayList<>(schemaConfig.getColumnCount());
-			for (ColumnConfig c : schemaConfig.getColumns()) {
-				ColumnOptionTask option = c.getOption().loadConfig(ColumnOptionTask.class);
-				columnOptions.add(option);
-			}
-		}
-		return columnOptions;
+	public PoiExcelColumnBean getColumnBean(Column column) {
+		return sheetBean.getColumnBean(column);
 	}
 }
