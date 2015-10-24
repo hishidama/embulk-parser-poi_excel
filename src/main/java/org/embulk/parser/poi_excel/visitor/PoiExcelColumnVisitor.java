@@ -81,8 +81,8 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		case COLUMN_NUMBER:
 			visitor.visitColumnNumber(column, bean.getColumnIndex() + 1);
 			return;
-		case EMPTY:
-			pageBuilder.setNull(column);
+		case CONSTANT:
+			visitCellConstant(column, bean.getValueTypeSuffix(), visitor);
 			return;
 		default:
 			break;
@@ -111,6 +111,14 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		default:
 			throw new UnsupportedOperationException(MessageFormat.format("unsupported value_type={0}", valueType));
 		}
+	}
+
+	protected void visitCellConstant(Column column, String value, CellVisitor visitor) {
+		if (value == null) {
+			pageBuilder.setNull(column);
+			return;
+		}
+		visitor.visitCellValueString(column, null, value);
 	}
 
 	protected void visitCellNull(Column column) {

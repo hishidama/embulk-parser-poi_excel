@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.embulk.config.ConfigException;
 import org.embulk.parser.poi_excel.PoiExcelColumnValueType;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnCommonOptionTask;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
@@ -54,17 +55,24 @@ public class PoiExcelColumnBean {
 			return;
 		}
 
-		int n = type.indexOf('.');
-		if (n >= 0) {
-			String suffix = type.substring(n + 1).trim();
-			this.valueTypeSuffix = suffix;
-			type = type.substring(0, n).trim();
+		String suffix = null;
+		{
+			int n = type.indexOf('.');
+			if (n >= 0) {
+				suffix = type.substring(n + 1); // not trim
+				this.valueTypeSuffix = suffix.trim();
+				type = type.substring(0, n).trim();
+			}
 		}
 
 		try {
 			this.valueType = PoiExcelColumnValueType.valueOf(type.toUpperCase());
 		} catch (Exception e) {
-			throw new RuntimeException(MessageFormat.format("illegal value_type={0}", type), e);
+			throw new ConfigException(MessageFormat.format("illegal value_type={0}", type), e);
+		}
+
+		if (valueType == PoiExcelColumnValueType.CONSTANT) {
+			this.valueTypeSuffix = suffix; // not trim
 		}
 	}
 

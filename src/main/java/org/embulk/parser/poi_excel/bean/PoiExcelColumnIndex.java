@@ -34,12 +34,47 @@ public class PoiExcelColumnIndex {
 				if (index < 0) {
 					index = 0;
 				}
-				log.info("column.name={} <- cell column={}, value_type={}", column.getName(),
-						CellReference.convertNumToColString(index), valueType);
 				bean.setColumnIndex(index);
 				indexMap.put(column.getName(), index);
+				if (log.isInfoEnabled()) {
+					String c = CellReference.convertNumToColString(index);
+					switch (valueType) {
+					default:
+						String suffix = bean.getValueTypeSuffix();
+						if (suffix != null) {
+							log.info("column.name={} <- cell_column={}, value_type={}, value_key=[{}]",
+									column.getName(), c, valueType, suffix);
+						} else {
+							log.info("column.name={} <- cell_column={}, value_type={}, value_key={}", column.getName(),
+									c, valueType, suffix);
+						}
+						break;
+					case CELL_VALUE:
+					case CELL_FORMULA:
+						log.info("column.name={} <- cell_column={}, value_type={}", column.getName(), c, valueType);
+						break;
+					}
+				}
 			} else {
-				log.info("column.name={} <- value_type={}", column.getName(), valueType);
+				if (log.isInfoEnabled()) {
+					switch (valueType) {
+					default:
+						String suffix = bean.getValueTypeSuffix();
+						if (suffix != null) {
+							log.info("column.name={} <- value_type={}, value_key=[{}]", column.getName(), valueType,
+									suffix);
+						} else {
+							log.info("column.name={} <- value_type={}, value_key={}", column.getName(), valueType,
+									suffix);
+						}
+						break;
+					case SHEET_NAME:
+					case ROW_NUMBER:
+					case COLUMN_NUMBER:
+						log.info("column.name={} <- value_type={}", column.getName(), valueType);
+						break;
+					}
+				}
 			}
 		}
 	}

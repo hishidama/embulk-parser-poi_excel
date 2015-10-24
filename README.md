@@ -32,7 +32,10 @@ This plugin uses Apache POI.
 * `sheet_name`: sheet name.
 * `row_number`: row number(1 origin).
 * `column_number`: column number(1 origin).
-* `empty`: always null.
+* `constant`: constant value.
+
+  * `constant.`*value*: specified value.
+  * `constant`: null.
 
 ### column_number
 

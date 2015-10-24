@@ -17,8 +17,8 @@ public enum PoiExcelColumnValueType {
 	ROW_NUMBER(false, false),
 	/** column number (1 origin) */
 	COLUMN_NUMBER(true, false),
-	/** null */
-	EMPTY(false, false);
+	/** constant */
+	CONSTANT(false, false);
 
 	private final boolean useCell;
 	private final boolean nextIndex;
