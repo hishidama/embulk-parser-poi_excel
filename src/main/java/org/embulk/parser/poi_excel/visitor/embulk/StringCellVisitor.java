@@ -60,4 +60,9 @@ public class StringCellVisitor extends CellVisitor {
 		String value = CellReference.convertNumToColString(index1 - 1);
 		pageBuilder.setString(column, value);
 	}
+
+	@Override
+	protected void doConvertErrorConstant(Column column, String value) throws Exception {
+		pageBuilder.setString(column, value);
+	}
 }

@@ -17,7 +17,14 @@ public class LongCellVisitor extends CellVisitor {
 
 	@Override
 	public void visitCellValueString(Column column, Object source, String value) {
-		pageBuilder.setLong(column, Long.parseLong(value));
+		long l;
+		try {
+			l = Long.parseLong(value);
+		} catch (NumberFormatException e) {
+			doConvertError(column, value, e);
+			return;
+		}
+		pageBuilder.setLong(column, l);
 	}
 
 	@Override
@@ -50,5 +57,10 @@ public class LongCellVisitor extends CellVisitor {
 	@Override
 	public void visitColumnNumber(Column column, int index1) {
 		pageBuilder.setLong(column, index1);
+	}
+
+	@Override
+	protected void doConvertErrorConstant(Column column, String value) throws Exception {
+		pageBuilder.setLong(column, Long.parseLong(value));
 	}
 }

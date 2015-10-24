@@ -110,6 +110,10 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		@Config("on_cell_error")
 		@ConfigDefault("null")
 		public Optional<String> getOnCellError();
+
+		@Config("on_convert_error")
+		@ConfigDefault("null")
+		public Optional<String> getOnConvertError();
 	}
 
 	public interface FormulaReplaceTask extends Task {

@@ -202,8 +202,8 @@ public class PoiExcelCellValueVisitor {
 			break;
 		case EXCEPTION:
 			FormulaError error = FormulaError.forInt((byte) errorCode);
-			throw new RuntimeException(MessageFormat.format("encount cell error. code={0}({0})", error.getString(),
-					errorCode));
+			throw new RuntimeException(MessageFormat.format("encount cell error. error_code={0}({1})", errorCode,
+					error.getString()));
 		}
 
 		visitor.visitCellValueError(column, cell, errorCode);

@@ -1,6 +1,11 @@
 package org.embulk.parser.poi_excel.visitor.embulk;
 
+import java.text.MessageFormat;
+
 import org.apache.poi.ss.usermodel.Cell;
+import org.embulk.config.ConfigException;
+import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
+import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean.ErrorStrategy;
 import org.embulk.parser.poi_excel.visitor.PoiExcelVisitorValue;
 import org.embulk.spi.Column;
 import org.embulk.spi.PageBuilder;
@@ -38,4 +43,29 @@ public abstract class CellVisitor {
 	public abstract void visitRowNumber(Column column, int index1);
 
 	public abstract void visitColumnNumber(Column column, int index1);
+
+	protected void doConvertError(Column column, Object srcValue, Throwable t) {
+		PoiExcelColumnBean bean = visitorValue.getColumnBean(column);
+		ErrorStrategy strategy = bean.getConvertErrorStrategy();
+		switch (strategy.getStrategy()) {
+		default:
+			break;
+		case CONSTANT:
+			String value = strategy.getValue();
+			if (value == null) {
+				pageBuilder.setNull(column);
+			} else {
+				try {
+					doConvertErrorConstant(column, value);
+				} catch (Exception e) {
+					throw new ConfigException(MessageFormat.format("constant value convert error. value={0}", value), e);
+				}
+			}
+			return;
+		}
+
+		throw new RuntimeException(MessageFormat.format("convert error. value={0}", srcValue), t);
+	}
+
+	protected abstract void doConvertErrorConstant(Column column, String value) throws Exception;
 }

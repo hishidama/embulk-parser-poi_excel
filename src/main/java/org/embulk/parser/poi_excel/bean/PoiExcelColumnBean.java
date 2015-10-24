@@ -180,6 +180,9 @@ public class PoiExcelColumnBean {
 				return Optional.absent();
 			}
 			String value = option.get();
+			if ("null".equalsIgnoreCase(value)) {
+				value = Strategy.CONSTANT.name();
+			}
 
 			String suffix = null;
 			int n = value.indexOf('.');
@@ -282,5 +285,16 @@ public class PoiExcelColumnBean {
 
 	public ErrorStrategy getCellErrorStrategy() {
 		return cellErrorStrategy.get();
+	}
+
+	private CacheErrorStrategy convertErrorStrategy = new CacheErrorStrategy() {
+		@Override
+		protected Optional<String> getStringValue(ColumnCommonOptionTask task) {
+			return task.getOnConvertError();
+		}
+	};
+
+	public ErrorStrategy getConvertErrorStrategy() {
+		return convertErrorStrategy.get();
 	}
 }

@@ -22,6 +22,7 @@ This plugin uses Apache POI.
 * **column_number**: Excel column number. see below. (string, default: next column)
 * **attribute_name**: use with value `cell_style`, `cell_font`, etc. see below. (list of string)
 * **on_cell_error**: processing method of Cell error. see below. (string, default: `constant`)
+* **on_convert_error**: processing method of convert error. see below. (string, default: `exception`)
 
 ### value
 
@@ -98,6 +99,20 @@ Processing method of Cell error (`#DIV/0!`, `#REF!`, etc).
 * `constant.`*value*: set value.
 * `error_code`: set error code.
 * `exception`: throw exception.
+
+
+### on_convert_error
+
+Processing method of convert error. ex) Excel boolean to Embulk timestamp
+
+```yaml
+    columns:
+    - {name: foo, type: timestamp, format: "%Y/%m/%d", column_number: A, value: cell_value, on_convert_error: constant.9999/12/31}
+```
+
+* `constant`: set null.
+* `constant.`*value*: set value.
+* `exception`: throw exception. (default)
 
 
 ## Example

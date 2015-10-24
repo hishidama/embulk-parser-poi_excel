@@ -17,7 +17,14 @@ public class DoubleCellVisitor extends CellVisitor {
 
 	@Override
 	public void visitCellValueString(Column column, Object source, String value) {
-		pageBuilder.setDouble(column, Double.parseDouble(value));
+		double d;
+		try {
+			d = Double.parseDouble(value);
+		} catch (NumberFormatException e) {
+			doConvertError(column, value, e);
+			return;
+		}
+		pageBuilder.setDouble(column, d);
 	}
 
 	@Override
@@ -50,5 +57,10 @@ public class DoubleCellVisitor extends CellVisitor {
 	@Override
 	public void visitColumnNumber(Column column, int index1) {
 		pageBuilder.setDouble(column, index1);
+	}
+
+	@Override
+	protected void doConvertErrorConstant(Column column, String value) throws Exception {
+		pageBuilder.setDouble(column, Double.parseDouble(value));
 	}
 }

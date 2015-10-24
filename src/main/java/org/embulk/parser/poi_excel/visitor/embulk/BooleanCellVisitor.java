@@ -51,4 +51,9 @@ public class BooleanCellVisitor extends CellVisitor {
 	public void visitColumnNumber(Column column, int index1) {
 		pageBuilder.setBoolean(column, index1 != 0);
 	}
+
+	@Override
+	protected void doConvertErrorConstant(Column column, String value) throws Exception {
+		pageBuilder.setBoolean(column, Boolean.parseBoolean(value));
+	}
 }
