@@ -8,6 +8,29 @@ This plugin uses Apache POI.
 * **Plugin type**: parser
 * **Guess supported**: no
 
+
+## Example
+
+```yaml
+in:
+  type: any file input plugin type
+  parser:
+    type: poi_excel
+    sheets: ["DQ10-orb"]
+    skip_header_lines: 1	# first row is header.
+    columns:
+    - {name: row, type: long, value: row_number}
+    - {name: get_date, type: timestamp, value: cell_value, column_number: A}
+    - {name: orb_type, type: string}
+    - {name: orb_name, type: string}
+    - {name: orb_shape, type: long}
+    - {name: drop_monster_name, type: string}
+```
+
+if omit **value**, specified `cell_value`.  
+if omit **column_number** when **valus** is `cell_value`, specified next column.  
+
+
 ## Configuration
 
 * **sheets**: sheet name. (list of string, required)
@@ -141,34 +164,11 @@ Options of indivisual sheet.
           bar: {value: constant.0}
 ```
 
-*sheet_options* is map of sheet name.  
-Map values are *skip_header_lines*, *colums*.
+**sheet_options** is map of sheet name.  
+Map values are **skip_header_lines**, **colums**.
 
-*columns* is map of column name.  
-Map values are same *columns* in *parser*.
-
-
-## Example
-
-```yaml
-in:
-  type: any file input plugin type
-  parser:
-    type: poi_excel
-    sheets: ["DQ10-orb"]
-    skip_header_lines: 1	# first row is header.
-    columns:
-    - {name: row, type: long, value: row_number}
-    - {name: get_date, type: timestamp, value: cell_value, column_number: A}
-    - {name: orb_type, type: string}
-    - {name: orb_name, type: string}
-    - {name: orb_shape, type: long}
-    - {name: drop_monster_name, type: string}
-```
-
-if omit `value`, specified `cell_value`.  
-if omit `column_number` when valus is `cell_value`, specified next column.  
-if omit `column_number` when valus is `cell_style`, specified same column.
+**columns** is map of column name.  
+Map values are same **columns** in **parser** (excluding `name`, `type`).
 
 
 ## Install
