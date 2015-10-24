@@ -1,13 +1,13 @@
 package org.embulk.parser.poi_excel;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import java.net.URL;
 import java.text.ParseException;
 import java.util.List;
 
-import org.apache.poi.ss.usermodel.FormulaError;
 import org.embulk.parser.EmbulkPluginTester;
 import org.embulk.parser.EmbulkTestOutputPlugin.OutputRecord;
 import org.embulk.parser.EmbulkTestParserConfig;
@@ -23,7 +23,6 @@ public class TestPoiExcelParserPlugin_columnNumber {
 			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
 			parser.set("sheet", "test1");
 			parser.set("skip_header_lines", 1);
-			parser.set("cell_error_null", false);
 			parser.addColumn("text", "string").set("column_number", "D");
 
 			URL inFile = getClass().getResource("test1.xls");
@@ -36,7 +35,7 @@ public class TestPoiExcelParserPlugin_columnNumber {
 			assertThat(result.get(3).getAsString("text"), is("abc"));
 			assertThat(result.get(4).getAsString("text"), is("abc"));
 			assertThat(result.get(5).getAsString("text"), is("true"));
-			assertThat(result.get(6).getAsString("text"), is("#DIV/0!"));
+			assertThat(result.get(6).getAsString("text"), is(nullValue()));
 		}
 	}
 
@@ -48,7 +47,6 @@ public class TestPoiExcelParserPlugin_columnNumber {
 			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
 			parser.set("sheet", "test1");
 			parser.set("skip_header_lines", 1);
-			parser.set("cell_error_null", false);
 			parser.addColumn("long", "long").set("column_number", 2);
 			parser.addColumn("double", "double");
 
@@ -62,7 +60,7 @@ public class TestPoiExcelParserPlugin_columnNumber {
 			check_int(result, 3, 123L, 123.4d);
 			check_int(result, 4, 123L, 123.4d);
 			check_int(result, 5, 1L, 1d);
-			check_int(result, 6, (long) FormulaError.DIV0.getCode(), (double) FormulaError.DIV0.getCode());
+			check_int(result, 6, null, null);
 		}
 	}
 

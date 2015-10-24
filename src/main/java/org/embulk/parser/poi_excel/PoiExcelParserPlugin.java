@@ -103,16 +103,6 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		@ConfigDefault("null")
 		public Optional<List<FormulaReplaceTask>> getFormulaReplace();
 
-		@Config("formula_error_null")
-		@ConfigDefault("null")
-		@Deprecated
-		public Optional<Boolean> getFormulaErrorNull();
-
-		@Config("cell_error_null")
-		@ConfigDefault("null")
-		@Deprecated
-		public Optional<Boolean> getCellErrorNull();
-
 		@Config("on_error")
 		@ConfigDefault("{}")
 		public Map<String, String> getOnError();
@@ -124,7 +114,7 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		public String getRegex();
 
 		// replace string
-		// use variable: "${row}"
+		// can use variable: "${row}"
 		@Config("to")
 		public String getTo();
 	}

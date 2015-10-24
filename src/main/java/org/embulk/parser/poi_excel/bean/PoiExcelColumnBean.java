@@ -4,12 +4,14 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.embulk.config.ConfigException;
 import org.embulk.parser.poi_excel.PoiExcelColumnValueType;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnCommonOptionTask;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.FormulaReplaceTask;
+import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean.ErrorStrategy.Strategy;
 import org.embulk.spi.Column;
 
 import com.google.common.base.Optional;
@@ -135,6 +137,81 @@ public class PoiExcelColumnBean {
 		protected abstract T getDefaultValue();
 	}
 
+	public static final class ErrorStrategy {
+		private final Strategy strategy;
+		private final String value;
+
+		public static enum Strategy {
+			DEFAULT, EXCEPTION, CONSTANT, ERROR_CODE
+		}
+
+		public ErrorStrategy(Strategy strategy) {
+			this.strategy = strategy;
+			this.value = null;
+		}
+
+		public ErrorStrategy(String value) {
+			this.strategy = Strategy.CONSTANT;
+			this.value = value;
+		}
+
+		public Strategy getStrategy() {
+			return strategy;
+		}
+
+		public String getValue() {
+			return value;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("ErrorStrategy(%s, %s)", strategy, value);
+		}
+	}
+
+	protected class CacheErrorStrategy extends CacheValue<ErrorStrategy> {
+		private final String key;
+
+		public CacheErrorStrategy(String key) {
+			this.key = key;
+		}
+
+		@Override
+		protected Optional<ErrorStrategy> getTaskValue(ColumnCommonOptionTask task) {
+			Map<String, String> map = task.getOnError();
+			if (!map.containsKey(key)) {
+				return Optional.absent();
+			}
+			String value = map.get(key);
+			if (value == null) {
+				return Optional.of(new ErrorStrategy((String) null));
+			}
+
+			String suffix = null;
+			int n = value.indexOf('.');
+			if (n >= 0) {
+				suffix = value.substring(n + 1);
+				value = value.substring(0, n).trim();
+			}
+			try {
+				Strategy strategy = Strategy.valueOf(value.toUpperCase());
+				switch (strategy) {
+				case CONSTANT:
+					return Optional.of(new ErrorStrategy(suffix));
+				default:
+					return Optional.of(new ErrorStrategy(strategy));
+				}
+			} catch (Exception e) {
+				throw new ConfigException(MessageFormat.format("illegal on-error type={0}", value), e);
+			}
+		}
+
+		@Override
+		protected ErrorStrategy getDefaultValue() {
+			return new ErrorStrategy(Strategy.DEFAULT);
+		}
+	}
+
 	private CacheValue<List<String>> attributeName = new CacheValue<List<String>>() {
 
 		@Override
@@ -189,37 +266,15 @@ public class PoiExcelColumnBean {
 		return formulaReplace.get();
 	}
 
-	private CacheValue<Boolean> formulaErrorNull = new CacheValue<Boolean>() {
+	private CacheErrorStrategy evaluateErrorStrategy = new CacheErrorStrategy("evaluate_error");
 
-		@Override
-		protected Optional<Boolean> getTaskValue(ColumnCommonOptionTask task) {
-			return task.getFormulaErrorNull();
-		}
-
-		@Override
-		protected Boolean getDefaultValue() {
-			return false;
-		}
-	};
-
-	public boolean getFormulaErrorNull() {
-		return formulaErrorNull.get();
+	public ErrorStrategy getEvaluateErrorStrategy() {
+		return evaluateErrorStrategy.get();
 	}
 
-	private CacheValue<Boolean> cellErrorNull = new CacheValue<Boolean>() {
+	private CacheErrorStrategy cellErrorStrategy = new CacheErrorStrategy("cell_error");
 
-		@Override
-		protected Optional<Boolean> getTaskValue(ColumnCommonOptionTask task) {
-			return task.getCellErrorNull();
-		}
-
-		@Override
-		protected Boolean getDefaultValue() {
-			return true;
-		}
-	};
-
-	public boolean getCellErrorNull() {
-		return cellErrorNull.get();
+	public ErrorStrategy getCellErrorStrategy() {
+		return cellErrorStrategy.get();
 	}
 }

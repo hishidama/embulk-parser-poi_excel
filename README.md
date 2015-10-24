@@ -21,6 +21,7 @@ This plugin uses Apache POI.
 * **value**: value type. see below. (string, defualt: `cell_value`)
 * **column_number**: Excel column number. see below. (string, default: next column)
 * **attribute_name**: use with value `cell_style`, `cell_font`, etc. see below. (list of string)
+* **on_error**: processing method of an error. see below. (map, default: `{}`)
 
 ### value
 
@@ -82,6 +83,16 @@ attribute_nameを指定することで、指定された属性だけを取得し
 
 なお、`cell_style`や`cell_font`では、**column_number**を省略した場合は直前と同じ列を対象とします。  
 （`cell_value`では、**column_number**を省略すると次の列に移る）
+
+
+### on_error
+
+Processing method of an error.
+
+```yaml
+    columns:
+    - {name: foo, type: string, on_error: {cell_error: error_code}}
+```
 
 
 ## Example

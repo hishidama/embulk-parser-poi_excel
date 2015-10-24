@@ -75,7 +75,6 @@ public class TestPoiExcelParserPlugin {
 			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
 			parser.set("sheets", Arrays.asList("test1"));
 			parser.set("skip_header_lines", 1);
-			parser.set("cell_error_null", false);
 			parser.addColumn("sheet", "string").set("value", "sheet_name");
 			parser.addColumn("sheet-n", "long").set("value", "sheet_name");
 			parser.addColumn("row", "long").set("value", "row_number");

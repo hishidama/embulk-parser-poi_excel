@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.FormulaError;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -14,6 +15,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.embulk.parser.poi_excel.PoiExcelColumnValueType;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.FormulaReplaceTask;
 import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
+import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean.ErrorStrategy;
 import org.embulk.parser.poi_excel.visitor.embulk.CellVisitor;
 import org.embulk.spi.Column;
 import org.embulk.spi.Exec;
@@ -140,9 +142,17 @@ public class PoiExcelCellValueVisitor {
 			FormulaEvaluator evaluator = helper.createFormulaEvaluator();
 			cellValue = evaluator.evaluate(cell);
 		} catch (Exception e) {
-			boolean setNull = bean.getFormulaErrorNull();
-			if (setNull) {
-				pageBuilder.setNull(column);
+			ErrorStrategy strategy = bean.getEvaluateErrorStrategy();
+			switch (strategy.getStrategy()) {
+			default:
+				break;
+			case CONSTANT:
+				String value = strategy.getValue();
+				if (value == null) {
+					pageBuilder.setNull(column);
+				} else {
+					visitor.visitCellValueString(column, cell, value);
+				}
 				return;
 			}
 
@@ -175,10 +185,25 @@ public class PoiExcelCellValueVisitor {
 	protected void visitCellValueError(PoiExcelColumnBean bean, Object cell, int errorCode, CellVisitor visitor) {
 		Column column = bean.getColumn();
 
-		boolean setNull = bean.getCellErrorNull();
-		if (setNull) {
+		ErrorStrategy strategy = bean.getCellErrorStrategy();
+		switch (strategy.getStrategy()) {
+		default:
 			pageBuilder.setNull(column);
 			return;
+		case CONSTANT:
+			String value = strategy.getValue();
+			if (value == null) {
+				pageBuilder.setNull(column);
+			} else {
+				visitor.visitCellValueString(column, cell, value);
+			}
+			return;
+		case ERROR_CODE:
+			break;
+		case EXCEPTION:
+			FormulaError error = FormulaError.forInt((byte) errorCode);
+			throw new RuntimeException(MessageFormat.format("encount cell error. code={0}({0})", error.getString(),
+					errorCode));
 		}
 
 		visitor.visitCellValueError(column, cell, errorCode);
