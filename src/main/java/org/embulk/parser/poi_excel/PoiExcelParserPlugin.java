@@ -103,9 +103,13 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		@ConfigDefault("null")
 		public Optional<List<FormulaReplaceTask>> getFormulaReplace();
 
-		@Config("on_error")
-		@ConfigDefault("{}")
-		public Map<String, String> getOnError();
+		@Config("on_evaluate_error")
+		@ConfigDefault("null")
+		public Optional<String> getOnEvaluateError();
+
+		@Config("on_cell_error")
+		@ConfigDefault("null")
+		public Optional<String> getOnCellError();
 	}
 
 	public interface FormulaReplaceTask extends Task {

@@ -4,7 +4,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.embulk.config.ConfigException;
 import org.embulk.parser.poi_excel.PoiExcelColumnValueType;
@@ -169,23 +168,18 @@ public class PoiExcelColumnBean {
 		}
 	}
 
-	protected class CacheErrorStrategy extends CacheValue<ErrorStrategy> {
-		private final String key;
+	protected abstract class CacheErrorStrategy extends CacheValue<ErrorStrategy> {
 
-		public CacheErrorStrategy(String key) {
-			this.key = key;
+		public CacheErrorStrategy() {
 		}
 
 		@Override
 		protected Optional<ErrorStrategy> getTaskValue(ColumnCommonOptionTask task) {
-			Map<String, String> map = task.getOnError();
-			if (!map.containsKey(key)) {
+			Optional<String> option = getStringValue(task);
+			if (!option.isPresent()) {
 				return Optional.absent();
 			}
-			String value = map.get(key);
-			if (value == null) {
-				return Optional.of(new ErrorStrategy((String) null));
-			}
+			String value = option.get();
 
 			String suffix = null;
 			int n = value.indexOf('.');
@@ -205,6 +199,8 @@ public class PoiExcelColumnBean {
 				throw new ConfigException(MessageFormat.format("illegal on-error type={0}", value), e);
 			}
 		}
+
+		protected abstract Optional<String> getStringValue(ColumnCommonOptionTask task);
 
 		@Override
 		protected ErrorStrategy getDefaultValue() {
@@ -266,13 +262,23 @@ public class PoiExcelColumnBean {
 		return formulaReplace.get();
 	}
 
-	private CacheErrorStrategy evaluateErrorStrategy = new CacheErrorStrategy("evaluate_error");
+	private CacheErrorStrategy evaluateErrorStrategy = new CacheErrorStrategy() {
+		@Override
+		protected Optional<String> getStringValue(ColumnCommonOptionTask task) {
+			return task.getOnEvaluateError();
+		}
+	};
 
 	public ErrorStrategy getEvaluateErrorStrategy() {
 		return evaluateErrorStrategy.get();
 	}
 
-	private CacheErrorStrategy cellErrorStrategy = new CacheErrorStrategy("cell_error");
+	private CacheErrorStrategy cellErrorStrategy = new CacheErrorStrategy() {
+		@Override
+		protected Optional<String> getStringValue(ColumnCommonOptionTask task) {
+			return task.getOnCellError();
+		}
+	};
 
 	public ErrorStrategy getCellErrorStrategy() {
 		return cellErrorStrategy.get();
