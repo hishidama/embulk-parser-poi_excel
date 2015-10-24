@@ -42,15 +42,16 @@ public class PoiExcelColumnIndex {
 					default:
 						String suffix = bean.getValueTypeSuffix();
 						if (suffix != null) {
-							log.info("column.name={} <- cell_column={}, value_type={}, value_key=[{}]",
-									column.getName(), c, valueType, suffix);
-						} else {
-							log.info("column.name={} <- cell_column={}, value_type={}, value_key={}", column.getName(),
+							log.info("column.name={} <- cell_column={}, value_type={}, value=[{}]", column.getName(),
 									c, valueType, suffix);
+						} else {
+							log.info("column.name={} <- cell_column={}, value_type={}, value={}", column.getName(), c,
+									valueType, suffix);
 						}
 						break;
 					case CELL_VALUE:
 					case CELL_FORMULA:
+					case COLUMN_NUMBER:
 						log.info("column.name={} <- cell_column={}, value_type={}", column.getName(), c, valueType);
 						break;
 					}
@@ -61,16 +62,13 @@ public class PoiExcelColumnIndex {
 					default:
 						String suffix = bean.getValueTypeSuffix();
 						if (suffix != null) {
-							log.info("column.name={} <- value_type={}, value_key=[{}]", column.getName(), valueType,
-									suffix);
+							log.info("column.name={} <- value_type={}, value=[{}]", column.getName(), valueType, suffix);
 						} else {
-							log.info("column.name={} <- value_type={}, value_key={}", column.getName(), valueType,
-									suffix);
+							log.info("column.name={} <- value_type={}, value={}", column.getName(), valueType, suffix);
 						}
 						break;
 					case SHEET_NAME:
 					case ROW_NUMBER:
-					case COLUMN_NUMBER:
 						log.info("column.name={} <- value_type={}", column.getName(), valueType);
 						break;
 					}
