@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.PluginTask;
+import org.embulk.parser.poi_excel.PoiExcelParserPlugin.SheetCommonOptionTask;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.SheetOptionTask;
 import org.embulk.spi.Column;
 import org.embulk.spi.ColumnConfig;
@@ -20,7 +21,7 @@ public class PoiExcelSheetBean {
 
 	protected final Sheet sheet;
 
-	private final List<SheetOptionTask> sheetTaskList = new ArrayList<>(2);
+	private final List<SheetCommonOptionTask> sheetTaskList = new ArrayList<>(2);
 
 	private final List<PoiExcelColumnBean> columnBeanList = new ArrayList<>();
 
@@ -55,13 +56,14 @@ public class PoiExcelSheetBean {
 		List<ColumnConfig> list = task.getColumns().getColumns();
 
 		Map<String, ColumnOptionTask> map = new HashMap<>();
-		List<SheetOptionTask> slist = getSheetOption();
-		if (slist.size() >= 2) {
-			SheetOptionTask s = slist.get(0);
-			for (ColumnConfig c : s.getColumns().getColumns()) {
-				String name = c.getName();
-				ColumnOptionTask t = c.getOption().loadConfig(ColumnOptionTask.class);
-				map.put(name, t);
+		List<SheetCommonOptionTask> slist = getSheetOption();
+		for (int i = slist.size() - 1; i >= 0; i--) {
+			SheetCommonOptionTask s = slist.get(i);
+			if (s instanceof SheetOptionTask) {
+				Optional<Map<String, ColumnOptionTask>> option = ((SheetOptionTask) s).getColumns();
+				if (option.isPresent()) {
+					map.putAll(option.get());
+				}
 			}
 		}
 
@@ -76,13 +78,13 @@ public class PoiExcelSheetBean {
 		new PoiExcelColumnIndex().initializeColumnIndex(task, columnBeanList);
 	}
 
-	public final List<SheetOptionTask> getSheetOption() {
+	public final List<SheetCommonOptionTask> getSheetOption() {
 		return sheetTaskList;
 	}
 
 	public int getSkipHeaderLines() {
-		List<SheetOptionTask> list = getSheetOption();
-		for (SheetOptionTask sheetTask : list) {
+		List<SheetCommonOptionTask> list = getSheetOption();
+		for (SheetCommonOptionTask sheetTask : list) {
 			Optional<Integer> value = sheetTask.getSkipHeaderLines();
 			if (value.isPresent()) {
 				return value.get();

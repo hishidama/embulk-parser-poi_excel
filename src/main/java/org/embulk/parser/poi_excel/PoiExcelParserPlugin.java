@@ -39,7 +39,7 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 
 	public static final String TYPE = "poi_excel";
 
-	public interface PluginTask extends Task, TimestampParser.Task, SheetOptionTask {
+	public interface PluginTask extends Task, TimestampParser.Task, SheetCommonOptionTask {
 		@Config("sheet")
 		@ConfigDefault("null")
 		public Optional<String> getSheet();
@@ -56,19 +56,26 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		@ConfigDefault("{}")
 		public Map<String, SheetOptionTask> getSheetOptions();
 
+		@Config("columns")
+		public SchemaConfig getColumns();
+
 		@Config("flush_count")
 		@ConfigDefault("100")
 		public int getFlushCount();
 	}
 
-	public interface SheetOptionTask extends Task, ColumnCommonOptionTask {
+	public interface SheetCommonOptionTask extends Task, ColumnCommonOptionTask {
 
 		@Config("skip_header_lines")
 		@ConfigDefault("null")
 		public Optional<Integer> getSkipHeaderLines();
+	}
+
+	public interface SheetOptionTask extends Task, SheetCommonOptionTask {
 
 		@Config("columns")
-		public SchemaConfig getColumns();
+		@ConfigDefault("null")
+		public Optional<Map<String, ColumnOptionTask>> getColumns();
 	}
 
 	public interface ColumnOptionTask extends Task, ColumnCommonOptionTask {

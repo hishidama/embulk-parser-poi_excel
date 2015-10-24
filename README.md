@@ -13,6 +13,7 @@ This plugin uses Apache POI.
 * **sheets**: sheet name. (list of string, required)
 * **skip_header_lines**: skip rows. (integer, default: `0`)
 * **columns**: column definition. see below. (hash, required)
+* **sheet_options**: sheet option. see below. (hash, default: null)
 
 ### columns
 
@@ -115,6 +116,38 @@ Processing method of convert error. ex) Excel boolean to Embulk timestamp
 * `exception`: throw exception. (default)
 
 
+### sheet_options
+
+Options of indivisual sheet.
+
+```yaml
+  parser:
+    type: poi_excel
+    sheets: [Sheet1, Sheet2]
+    columns:
+    - {name: date, type: timestamp, column_number: A}
+    - {name: foo, type: string}
+    - {name: bar, type: long}
+    sheet_options:
+      Sheet1:
+        skip_header_lines: 1
+        columns:
+          foo: {column_number: B}
+          bar: {column_number: C}
+      Sheet2:
+        skip_header_lines: 0
+        columns:
+          foo: {column_number: D}
+          bar: {value: constant.0}
+```
+
+*sheet_options* is map of sheet name.  
+Map values are *skip_header_lines*, *colums*.
+
+*columns* is map of column name.  
+Map values are same *columns* in *parser*.
+
+
 ## Example
 
 ```yaml
@@ -148,5 +181,6 @@ $ embulk gem install embulk-parser-poi_excel
 ## Build
 
 ```
+$ ./gradlew test
 $ ./gradlew package
 ```
