@@ -74,7 +74,7 @@ public class PoiExcelCellCommentVisitor extends AbstractPoiExcelCellAttributeVis
 				return getClientAnchorValue(column, cell, comment, null);
 			}
 		});
-		for (String key : PoiExcelClientAnchorVisitor.getKeys()) {
+		for (final String key : PoiExcelClientAnchorVisitor.getKeys()) {
 			map.put("client_anchor." + key, new AttributeSupplier<Comment>() {
 				@Override
 				public Object get(Column column, Cell cell, Comment comment) {
