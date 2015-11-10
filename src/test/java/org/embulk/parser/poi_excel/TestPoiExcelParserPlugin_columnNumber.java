@@ -11,12 +11,19 @@ import java.util.List;
 import org.embulk.parser.EmbulkPluginTester;
 import org.embulk.parser.EmbulkTestOutputPlugin.OutputRecord;
 import org.embulk.parser.EmbulkTestParserConfig;
-import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 
+@RunWith(Theories.class)
 public class TestPoiExcelParserPlugin_columnNumber {
 
-	@Test
-	public void testColumnNumber_string() throws Exception {
+	@DataPoints
+	public static String[] FILES = { "test1.xls", "test2.xlsx" };
+
+	@Theory
+	public void testColumnNumber_string(String excelFile) throws Exception {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -25,7 +32,7 @@ public class TestPoiExcelParserPlugin_columnNumber {
 			parser.set("skip_header_lines", 1);
 			parser.addColumn("text", "string").set("column_number", "D");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(7));
@@ -39,8 +46,8 @@ public class TestPoiExcelParserPlugin_columnNumber {
 		}
 	}
 
-	@Test
-	public void testColumnNumber_int() throws Exception {
+	@Theory
+	public void testColumnNumber_int(String excelFile) throws Exception {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -50,7 +57,7 @@ public class TestPoiExcelParserPlugin_columnNumber {
 			parser.addColumn("long", "long").set("column_number", 2);
 			parser.addColumn("double", "double");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(7));
@@ -71,8 +78,8 @@ public class TestPoiExcelParserPlugin_columnNumber {
 		assertThat(r.getAsDouble("double"), is(d));
 	}
 
-	@Test
-	public void testColumnNumber_move() throws Exception {
+	@Theory
+	public void testColumnNumber_move(String excelFile) throws Exception {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -85,7 +92,7 @@ public class TestPoiExcelParserPlugin_columnNumber {
 			parser.addColumn("double2", "double").set("column_number", "=");
 			parser.addColumn("long3", "long").set("column_number", "-");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(7));
@@ -109,8 +116,8 @@ public class TestPoiExcelParserPlugin_columnNumber {
 		assertThat(r.getAsDouble("double2"), is(d));
 	}
 
-	@Test
-	public void testColumnNumber_move2() throws Exception {
+	@Theory
+	public void testColumnNumber_move2(String excelFile) throws Exception {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -123,7 +130,7 @@ public class TestPoiExcelParserPlugin_columnNumber {
 			parser.addColumn("string2", "string").set("column_number", "=string1");
 			parser.addColumn("long3", "long").set("column_number", "-2");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(7));
@@ -147,8 +154,8 @@ public class TestPoiExcelParserPlugin_columnNumber {
 		assertThat(r.getAsString("string2"), is(s));
 	}
 
-	@Test
-	public void testColumnNumber_moveName() throws Exception {
+	@Theory
+	public void testColumnNumber_moveName(String excelFile) throws Exception {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -160,7 +167,7 @@ public class TestPoiExcelParserPlugin_columnNumber {
 			parser.addColumn("long2", "long").set("column_number", "=long1");
 			parser.addColumn("boolean1", "boolean").set("column_number", "-long1");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(7));

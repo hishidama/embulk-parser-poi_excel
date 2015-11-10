@@ -15,12 +15,19 @@ import org.embulk.parser.EmbulkPluginTester;
 import org.embulk.parser.EmbulkTestOutputPlugin.OutputRecord;
 import org.embulk.parser.EmbulkTestParserConfig;
 import org.embulk.spi.time.Timestamp;
-import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 
+@RunWith(Theories.class)
 public class TestPoiExcelParserPlugin {
 
-	@Test
-	public void test1() throws ParseException {
+	@DataPoints
+	public static String[] FILES = { "test1.xls", "test2.xlsx" };
+
+	@Theory
+	public void test1(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -34,7 +41,7 @@ public class TestPoiExcelParserPlugin {
 			parser.addColumn("string", "string");
 			parser.addColumn("timestamp", "timestamp").set("format", "%Y/%m/%d");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(7));
@@ -67,8 +74,8 @@ public class TestPoiExcelParserPlugin {
 		assertThat(r.getAsTimestamp("timestamp"), is(timestamp));
 	}
 
-	@Test
-	public void testRowNumber() throws ParseException {
+	@Theory
+	public void testRowNumber(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -82,7 +89,7 @@ public class TestPoiExcelParserPlugin {
 			parser.addColumn("col-n", "long").set("value", "column_number");
 			parser.addColumn("col-s", "string").set("value", "column_number");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(7));
@@ -107,8 +114,8 @@ public class TestPoiExcelParserPlugin {
 		assertThat(r.getAsString("col-s"), is("A"));
 	}
 
-	@Test
-	public void testForumlaReplace() throws ParseException {
+	@Theory
+	public void testForumlaReplace(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -125,7 +132,7 @@ public class TestPoiExcelParserPlugin {
 
 			parser.addColumn("text", "string");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(2));
@@ -134,8 +141,8 @@ public class TestPoiExcelParserPlugin {
 		}
 	}
 
-	@Test
-	public void testSearchMergedCell_true() throws ParseException {
+	@Theory
+	public void testSearchMergedCell_true(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -144,7 +151,7 @@ public class TestPoiExcelParserPlugin {
 			parser.addColumn("a", "string");
 			parser.addColumn("b", "string");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(4));
@@ -155,8 +162,8 @@ public class TestPoiExcelParserPlugin {
 		}
 	}
 
-	@Test
-	public void testSearchMergedCell_false() throws ParseException {
+	@Theory
+	public void testSearchMergedCell_false(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -166,7 +173,7 @@ public class TestPoiExcelParserPlugin {
 			parser.addColumn("a", "string");
 			parser.addColumn("b", "string");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(4));
@@ -184,8 +191,8 @@ public class TestPoiExcelParserPlugin {
 		assertThat(r.getAsString("b"), is(b));
 	}
 
-	@Test
-	public void test_sheets() throws ParseException {
+	@Theory
+	public void test_sheets(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -193,7 +200,7 @@ public class TestPoiExcelParserPlugin {
 			parser.set("sheets", Arrays.asList("formula_replace", "merged_cell"));
 			parser.addColumn("a", "string");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(2 + 4));

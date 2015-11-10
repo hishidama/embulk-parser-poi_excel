@@ -13,12 +13,19 @@ import java.util.Map;
 import org.embulk.parser.EmbulkPluginTester;
 import org.embulk.parser.EmbulkTestOutputPlugin.OutputRecord;
 import org.embulk.parser.EmbulkTestParserConfig;
-import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 
+@RunWith(Theories.class)
 public class TestPoiExcelParserPlugin_sheets {
 
-	@Test
-	public void testSheets() throws ParseException {
+	@DataPoints
+	public static String[] FILES = { "test1.xls", "test2.xlsx" };
+
+	@Theory
+	public void testSheets(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -55,7 +62,7 @@ public class TestPoiExcelParserPlugin_sheets {
 			}
 			parser.set("sheet_options", sheetOptions);
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(8));

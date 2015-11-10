@@ -1,7 +1,8 @@
 package org.embulk.parser.poi_excel;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.net.URL;
 import java.text.ParseException;
@@ -12,12 +13,19 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.embulk.parser.EmbulkPluginTester;
 import org.embulk.parser.EmbulkTestOutputPlugin.OutputRecord;
 import org.embulk.parser.EmbulkTestParserConfig;
-import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 
+@RunWith(Theories.class)
 public class TestPoiExcelParserPlugin_cellStyle {
 
-	@Test
-	public void testStyle_key() throws ParseException {
+	@DataPoints
+	public static String[] FILES = { "test1.xls", "test2.xlsx" };
+
+	@Theory
+	public void testStyle_key(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -32,7 +40,7 @@ public class TestPoiExcelParserPlugin_cellStyle {
 			parser.addColumn("border-right", "long").set("value", "cell_style.border_right");
 			parser.addColumn("border-all", "long").set("value", "cell_style.border");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(5));
@@ -58,8 +66,8 @@ public class TestPoiExcelParserPlugin_cellStyle {
 		assertThat(record.getAsLong("border-all"), is(top << 24 | bottom << 16 | left << 8 | right));
 	}
 
-	@Test
-	public void testStyle_all() throws ParseException {
+	@Theory
+	public void testStyle_all(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -69,7 +77,7 @@ public class TestPoiExcelParserPlugin_cellStyle {
 			parser.addColumn("color-style", "string").set("column_number", "A").set("value", "cell_style");
 			parser.addColumn("border-style", "string").set("column_number", "B").set("value", "cell_style");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(5));
@@ -105,8 +113,8 @@ public class TestPoiExcelParserPlugin_cellStyle {
 		}
 	}
 
-	@Test
-	public void testStyle_keys() throws ParseException {
+	@Theory
+	public void testStyle_keys(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -118,7 +126,7 @@ public class TestPoiExcelParserPlugin_cellStyle {
 			parser.addColumn("border-style", "string").set("column_number", "B").set("value", "cell_style")
 					.set("attribute_name", Arrays.asList("border_top", "border_bottom", "border_left", "border_right"));
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(5));

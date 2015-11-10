@@ -14,12 +14,19 @@ import org.embulk.parser.EmbulkPluginTester;
 import org.embulk.parser.EmbulkTestOutputPlugin.OutputRecord;
 import org.embulk.parser.EmbulkTestParserConfig;
 import org.embulk.spi.time.Timestamp;
-import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 
+@RunWith(Theories.class)
 public class TestPoiExcelParserPlugin_cellError {
 
-	@Test
-	public void testCellError_default() throws Exception {
+	@DataPoints
+	public static String[] FILES = { "test1.xls", "test2.xlsx" };
+
+	@Theory
+	public void testCellError_default(String excelFile) throws Exception {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -32,7 +39,7 @@ public class TestPoiExcelParserPlugin_cellError {
 			parser.addColumn("s", "string").set("column_number", "A");
 			parser.addColumn("t", "timestamp").set("column_number", "A");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(1));
@@ -45,8 +52,8 @@ public class TestPoiExcelParserPlugin_cellError {
 		}
 	}
 
-	@Test
-	public void testCellError_code() throws Exception {
+	@Theory
+	public void testCellError_code(String excelFile) throws Exception {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -59,7 +66,7 @@ public class TestPoiExcelParserPlugin_cellError {
 			parser.addColumn("d", "double").set("column_number", "A");
 			parser.addColumn("s", "string").set("column_number", "A");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			OutputRecord r = result.get(0);
@@ -70,8 +77,8 @@ public class TestPoiExcelParserPlugin_cellError {
 		}
 	}
 
-	@Test
-	public void testCellError_null() throws Exception {
+	@Theory
+	public void testCellError_null(String excelFile) throws Exception {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -85,7 +92,7 @@ public class TestPoiExcelParserPlugin_cellError {
 			parser.addColumn("s", "string").set("column_number", "A");
 			parser.addColumn("t", "timestamp").set("column_number", "A");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(1));
@@ -98,8 +105,8 @@ public class TestPoiExcelParserPlugin_cellError {
 		}
 	}
 
-	@Test
-	public void testCellError_empty() throws Exception {
+	@Theory
+	public void testCellError_empty(String excelFile) throws Exception {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -112,7 +119,7 @@ public class TestPoiExcelParserPlugin_cellError {
 			parser.addColumn("s3", "string").set("column_number", "A").set("on_cell_error", "constant.");
 			parser.addColumn("s4", "string").set("column_number", "A").set("on_cell_error", "constant. ");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(1));
@@ -124,8 +131,8 @@ public class TestPoiExcelParserPlugin_cellError {
 		}
 	}
 
-	@Test
-	public void testCellError_constant() throws Exception {
+	@Theory
+	public void testCellError_constant(String excelFile) throws Exception {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -140,7 +147,7 @@ public class TestPoiExcelParserPlugin_cellError {
 			parser.addColumn("t", "timestamp").set("column_number", "A").set("format", "%Y/%m/%d")
 					.set("on_cell_error", "constant.2000/1/1");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			OutputRecord r = result.get(0);
@@ -153,8 +160,8 @@ public class TestPoiExcelParserPlugin_cellError {
 		}
 	}
 
-	@Test
-	public void testCellError_exception() throws Exception {
+	@Theory
+	public void testCellError_exception(String excelFile) throws Exception {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -168,7 +175,7 @@ public class TestPoiExcelParserPlugin_cellError {
 			parser.addColumn("s", "string").set("column_number", "A");
 			parser.addColumn("t", "timestamp").set("column_number", "A");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			try {
 				tester.runParser(inFile, parser);
 			} catch (Exception e) {

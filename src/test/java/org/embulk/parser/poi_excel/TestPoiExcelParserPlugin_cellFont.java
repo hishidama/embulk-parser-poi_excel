@@ -13,12 +13,19 @@ import java.util.List;
 import org.embulk.parser.EmbulkPluginTester;
 import org.embulk.parser.EmbulkTestOutputPlugin.OutputRecord;
 import org.embulk.parser.EmbulkTestParserConfig;
-import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 
+@RunWith(Theories.class)
 public class TestPoiExcelParserPlugin_cellFont {
 
-	@Test
-	public void testFont_key() throws ParseException {
+	@DataPoints
+	public static String[] FILES = { "test1.xls", "test2.xlsx" };
+
+	@Theory
+	public void testFont_key(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -28,7 +35,7 @@ public class TestPoiExcelParserPlugin_cellFont {
 			parser.addColumn("font-color", "long").set("column_number", "C").set("value", "cell_font.color");
 			parser.addColumn("font-bold", "boolean").set("value", "cell_font.bold");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(5));
@@ -48,8 +55,8 @@ public class TestPoiExcelParserPlugin_cellFont {
 		assertThat(record.getAsBoolean("font-bold"), is(fontBold));
 	}
 
-	@Test
-	public void testFont_all() throws ParseException {
+	@Theory
+	public void testFont_all(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -58,7 +65,7 @@ public class TestPoiExcelParserPlugin_cellFont {
 			parser.addColumn("color-text", "string");
 			parser.addColumn("color-font", "string").set("column_number", "C").set("value", "cell_font");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(5));
@@ -100,8 +107,8 @@ public class TestPoiExcelParserPlugin_cellFont {
 		}
 	}
 
-	@Test
-	public void testFont_keys() throws ParseException {
+	@Theory
+	public void testFont_keys(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -111,7 +118,7 @@ public class TestPoiExcelParserPlugin_cellFont {
 			parser.addColumn("color-font", "string").set("column_number", "C").set("value", "cell_font")
 					.set("attribute_name", Arrays.asList("color", "bold"));
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(5));

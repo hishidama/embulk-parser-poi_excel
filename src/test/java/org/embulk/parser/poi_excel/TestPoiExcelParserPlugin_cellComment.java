@@ -13,12 +13,19 @@ import java.util.List;
 import org.embulk.parser.EmbulkPluginTester;
 import org.embulk.parser.EmbulkTestOutputPlugin.OutputRecord;
 import org.embulk.parser.EmbulkTestParserConfig;
-import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 
+@RunWith(Theories.class)
 public class TestPoiExcelParserPlugin_cellComment {
 
-	@Test
-	public void testComment_key() throws ParseException {
+	@DataPoints
+	public static String[] FILES = { "test1.xls", "test2.xlsx" };
+
+	@Theory
+	public void testComment_key(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -27,7 +34,7 @@ public class TestPoiExcelParserPlugin_cellComment {
 			parser.addColumn("author", "string").set("value", "cell_comment.author");
 			parser.addColumn("comment", "string").set("value", "cell_comment.string");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(2));
@@ -43,8 +50,8 @@ public class TestPoiExcelParserPlugin_cellComment {
 		assertThat(record.getAsString("author"), is(author));
 	}
 
-	@Test
-	public void testComment_all() throws ParseException {
+	@Theory
+	public void testComment_all(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -52,7 +59,7 @@ public class TestPoiExcelParserPlugin_cellComment {
 			parser.set("sheet", "comment");
 			parser.addColumn("comment", "string").set("value", "cell_comment");
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(2));
@@ -78,8 +85,8 @@ public class TestPoiExcelParserPlugin_cellComment {
 		}
 	}
 
-	@Test
-	public void testComment_keys() throws ParseException {
+	@Theory
+	public void testComment_keys(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
 
@@ -88,7 +95,7 @@ public class TestPoiExcelParserPlugin_cellComment {
 			parser.addColumn("comment", "string").set("value", "cell_comment")
 					.set("attribute_name", Arrays.asList("author", "string"));
 
-			URL inFile = getClass().getResource("test1.xls");
+			URL inFile = getClass().getResource(excelFile);
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(2));
