@@ -69,6 +69,9 @@ public class PoiExcelColorVisitor {
 		} else if (color instanceof XSSFColor) {
 			XSSFColor xssf = (XSSFColor) color;
 			byte[] b = xssf.getRGB();
+			if (b == null) {
+				return -1;
+			}
 			rgb[0] = b[0] & 0xff;
 			rgb[1] = b[1] & 0xff;
 			rgb[2] = b[2] & 0xff;

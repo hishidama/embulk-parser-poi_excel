@@ -124,6 +124,9 @@ public abstract class AbstractPoiExcelCellAttributeVisitor<A> {
 
 		if (value instanceof Color) {
 			int rgb = PoiExcelColorVisitor.getRGB((Color) value);
+			if (rgb < 0) {
+				return null;
+			}
 			if (column.getType() instanceof StringType) {
 				value = String.format("%06x", rgb);
 			} else {
