@@ -28,7 +28,7 @@ in:
 ```
 
 if omit **value**, specified `cell_value`.  
-if omit **column_number** when **valus** is `cell_value`, specified next column.  
+if omit **column_number** when **value** is `cell_value`, specified next column.  
 
 
 ## Configuration
