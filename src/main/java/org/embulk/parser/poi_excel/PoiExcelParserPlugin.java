@@ -247,8 +247,13 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 
 				int count = 0;
 				for (Row row : sheet) {
-					if (row.getRowNum() < skipHeaderLines) {
+					int rowIndex = row.getRowNum();
+					if (rowIndex < skipHeaderLines) {
+						log.debug("row({}) skipped", rowIndex);
 						continue;
+					}
+					if (log.isDebugEnabled()) {
+						log.debug("row({}) start", rowIndex);
 					}
 
 					visitor.setRow(row);
@@ -256,8 +261,13 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 					pageBuilder.addRecord();
 
 					if (++count >= flushCount) {
+						log.trace("flush");
 						pageBuilder.flush();
 						count = 0;
+					}
+
+					if (log.isDebugEnabled()) {
+						log.debug("row({}) end", rowIndex);
 					}
 				}
 				pageBuilder.flush();
