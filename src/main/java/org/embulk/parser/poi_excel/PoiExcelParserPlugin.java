@@ -109,6 +109,10 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		@ConfigDefault("null")
 		public Optional<Boolean> getSearchMergedCell();
 
+		@Config("formula_handling")
+		@ConfigDefault("null")
+		public Optional<String> getFormulaHandling();
+
 		@Config("formula_replace")
 		@ConfigDefault("null")
 		public Optional<List<FormulaReplaceTask>> getFormulaReplace();

@@ -46,6 +46,7 @@ if omit **column_number** when **value** is `cell_value`, specified next column.
 * **column_number**: Excel column number. see below. (string, default: next column)
 * **attribute_name**: use with value `cell_style`, `cell_font`, etc. see below. (list of string)
 * **on_cell_error**: processing method of Cell error. see below. (string, default: `constant`)
+* **formula_handling** : processing method of formula. see below. (`evaluate` or `cashed_value`. default: `evaluate`)
 * **on_evaluate_error**: processing method of evaluate formula error. see below. (string, default: `exception`)
 * **formula_replace** : replace formula before evaluate. see below.
 * **on_convert_error**: processing method of convert error. see below. (string, default: `exception`)
@@ -127,6 +128,19 @@ Processing method of Cell error (`#DIV/0!`, `#REF!`, etc).
 * `exception`: throw exception.
 
 
+### formula_handling
+
+Processing method of formula.
+
+```yaml
+    columns:
+    - {name: foo, type: string, column_number: A, value: cell_value, formula_handling: cashed_value}
+```
+
+* `evaluate`: evaluate formula. (default)
+* `cashed_value`: cashed value in cell.
+
+
 ### on_evaluate_error
 
 Processing method of evaluate formula error.
@@ -143,14 +157,14 @@ Processing method of evaluate formula error.
 
 ### formula_replace
 
-Peplace formula before evaluate.
+Replace formula before evaluate.
 
 ```yaml
     columns:
     - {name: foo, type: string, column_number: A, value: cell_value, formula_replace: [{regex: aaa, to: "A${row}"}, {regex: bbb, to: "B${row}"}]}
 ```
 
-`${row}` is replaced with the current row.
+`${row}` is replaced with the current row number.
 
 
 ### on_convert_error

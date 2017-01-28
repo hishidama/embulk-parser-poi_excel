@@ -16,6 +16,7 @@ import org.embulk.parser.poi_excel.PoiExcelColumnValueType;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.FormulaReplaceTask;
 import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
 import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean.ErrorStrategy;
+import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean.FormulaHandling;
 import org.embulk.parser.poi_excel.visitor.embulk.CellVisitor;
 import org.embulk.spi.Column;
 import org.embulk.spi.Exec;
@@ -109,6 +110,44 @@ public class PoiExcelCellValueVisitor {
 	protected void visitCellValueFormula(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		assert cell.getCellType() == Cell.CELL_TYPE_FORMULA;
 
+		FormulaHandling handling = bean.getFormulaHandling();
+		switch (handling) {
+		case CASHED_VALUE:
+			visitCellValueFormulaCashedValue(bean, cell, visitor);
+			break;
+		default:
+			visitCellValueFormulaEvaluate(bean, cell, visitor);
+			break;
+		}
+	}
+
+	protected void visitCellValueFormulaCashedValue(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
+		Column column = bean.getColumn();
+
+		int cellType = cell.getCachedFormulaResultType();
+		switch (cellType) {
+		case Cell.CELL_TYPE_NUMERIC:
+			visitor.visitCellValueNumeric(column, cell, cell.getNumericCellValue());
+			return;
+		case Cell.CELL_TYPE_STRING:
+			visitor.visitCellValueString(column, cell, cell.getStringCellValue());
+			return;
+		case Cell.CELL_TYPE_BLANK:
+			visitCellValueBlank(bean, cell, visitor);
+			return;
+		case Cell.CELL_TYPE_BOOLEAN:
+			visitor.visitCellValueBoolean(column, cell, cell.getBooleanCellValue());
+			return;
+		case Cell.CELL_TYPE_ERROR:
+			visitCellValueError(bean, cell, cell.getErrorCellValue(), visitor);
+			return;
+		case Cell.CELL_TYPE_FORMULA:
+		default:
+			throw new IllegalStateException(MessageFormat.format("unsupported POI cellType={0}", cellType));
+		}
+	}
+
+	protected void visitCellValueFormulaEvaluate(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		Column column = bean.getColumn();
 
 		List<FormulaReplaceTask> list = bean.getFormulaReplace();

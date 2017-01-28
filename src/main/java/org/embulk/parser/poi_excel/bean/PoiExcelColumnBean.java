@@ -248,6 +248,41 @@ public class PoiExcelColumnBean {
 		return searchMergedCell.get();
 	}
 
+	public enum FormulaHandling {
+		EVALUATE, CASHED_VALUE
+	}
+
+	private CacheValue<FormulaHandling> formulaHandling = new CacheValue<FormulaHandling>() {
+
+		@Override
+		protected Optional<FormulaHandling> getTaskValue(ColumnCommonOptionTask task) {
+			Optional<String> option = task.getFormulaHandling();
+			String value = option.or("null");
+			if ("null".equalsIgnoreCase(value)) {
+				return Optional.absent();
+			}
+			try {
+				return Optional.of(FormulaHandling.valueOf(value.trim().toUpperCase()));
+			} catch (Exception e) {
+				List<String> list = new ArrayList<>();
+				for (FormulaHandling s : FormulaHandling.values()) {
+					list.add(s.name().toLowerCase());
+				}
+				throw new ConfigException(MessageFormat.format("illegal formula_handling={0}. expected={1}", value,
+						list), e);
+			}
+		}
+
+		@Override
+		protected FormulaHandling getDefaultValue() {
+			return FormulaHandling.EVALUATE;
+		}
+	};
+
+	public FormulaHandling getFormulaHandling() {
+		return formulaHandling.get();
+	}
+
 	private CacheValue<List<FormulaReplaceTask>> formulaReplace = new CacheValue<List<FormulaReplaceTask>>() {
 
 		@Override
