@@ -46,6 +46,8 @@ if omit **column_number** when **value** is `cell_value`, specified next column.
 * **column_number**: Excel column number. see below. (string, default: next column)
 * **attribute_name**: use with value `cell_style`, `cell_font`, etc. see below. (list of string)
 * **on_cell_error**: processing method of Cell error. see below. (string, default: `constant`)
+* **on_evaluate_error**: processing method of evaluate formula error. see below. (string, default: `exception`)
+* **formula_replace** : replace formula before evaluate. see below.
 * **on_convert_error**: processing method of convert error. see below. (string, default: `exception`)
 
 ### value
@@ -123,6 +125,32 @@ Processing method of Cell error (`#DIV/0!`, `#REF!`, etc).
 * `constant.`*value*: set value.
 * `error_code`: set error code.
 * `exception`: throw exception.
+
+
+### on_evaluate_error
+
+Processing method of evaluate formula error.
+
+```yaml
+    columns:
+    - {name: foo, type: string, column_number: A, value: cell_value, on_evaluate_error: constant}
+```
+
+* `constant`: set null.
+* `constant.`*value*: set value.
+* `exception`: throw exception. (default)
+
+
+### formula_replace
+
+Peplace formula before evaluate.
+
+```yaml
+    columns:
+    - {name: foo, type: string, column_number: A, value: cell_value, formula_replace: [{regex: aaa, to: "A${row}"}, {regex: bbb, to: "B${row}"}]}
+```
+
+`${row}` is replaced with the current row.
 
 
 ### on_convert_error
