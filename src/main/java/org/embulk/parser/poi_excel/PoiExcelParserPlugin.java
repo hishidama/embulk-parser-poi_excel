@@ -2,8 +2,11 @@ package org.embulk.parser.poi_excel;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -166,9 +169,60 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 					throw new RuntimeException(e);
 				}
 
-				run(task, schema, workbook, sheetNames, output);
+				List<String> list = resolveSheetName(workbook, sheetNames);
+				if (log.isDebugEnabled()) {
+					log.debug("resolved sheet names={}", list);
+				}
+				run(task, schema, workbook, list, output);
 			}
 		}
+	}
+
+	private List<String> resolveSheetName(Workbook workbook, List<String> sheetNames) {
+		Set<String> set = new LinkedHashSet<>();
+		for (String s : sheetNames) {
+			if (s.contains("*") || s.contains("?")) {
+				int length = s.length();
+				StringBuilder sb = new StringBuilder(length * 2);
+				StringBuilder buf = new StringBuilder(32);
+				for (int i = 0; i < length;) {
+					int c = s.codePointAt(i);
+					switch (c) {
+					case '*':
+						if (buf.length() > 0) {
+							sb.append(Pattern.quote(buf.toString()));
+							buf.setLength(0);
+						}
+						sb.append(".*");
+						break;
+					case '?':
+						if (buf.length() > 0) {
+							sb.append(Pattern.quote(buf.toString()));
+							buf.setLength(0);
+						}
+						sb.append(".");
+						break;
+					default:
+						buf.appendCodePoint(c);
+						break;
+					}
+					i += Character.charCount(c);
+				}
+				if (buf.length() > 0) {
+					sb.append(Pattern.quote(buf.toString()));
+				}
+				String regex = sb.toString();
+				for (Sheet sheet : workbook) {
+					String name = sheet.getSheetName();
+					if (name.matches(regex)) {
+						set.add(name);
+					}
+				}
+			} else {
+				set.add(s);
+			}
+		}
+		return new ArrayList<>(set);
 	}
 
 	protected void run(PluginTask task, Schema schema, Workbook workbook, List<String> sheetNames, PageOutput output) {

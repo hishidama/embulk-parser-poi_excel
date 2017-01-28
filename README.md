@@ -33,7 +33,7 @@ if omit **column_number** when **value** is `cell_value`, specified next column.
 
 ## Configuration
 
-* **sheets**: sheet name. (list of string, required)
+* **sheets**: sheet name. can use wildcards `*`, `?`. (list of string, required)
 * **skip_header_lines**: skip rows. (integer, default: `0`)
 * **columns**: column definition. see below. (hash, required)
 * **sheet_options**: sheet option. see below. (hash, default: null)

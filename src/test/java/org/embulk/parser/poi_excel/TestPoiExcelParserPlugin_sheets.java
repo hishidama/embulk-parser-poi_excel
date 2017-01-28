@@ -89,4 +89,38 @@ public class TestPoiExcelParserPlugin_sheets {
 		assertThat(record.getAsString("text"), is(text));
 		assertThat(record.getAsLong("number"), is(number));
 	}
+
+	@Theory
+	public void testResolveSheetName1(String excelFile) throws ParseException {
+		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
+			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
+
+			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
+			parser.set("sheets", Arrays.asList("*es*"));
+			parser.addColumn("name", "string").set("value", "sheet_name");
+
+			URL inFile = getClass().getResource(excelFile);
+			List<OutputRecord> result = tester.runParser(inFile, parser);
+
+			OutputRecord record = result.get(0);
+			assertThat(record.getAsString("name"), is("test1"));
+		}
+	}
+
+	@Theory
+	public void testResolveSheetName2(String excelFile) throws ParseException {
+		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
+			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
+
+			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
+			parser.set("sheets", Arrays.asList("test?"));
+			parser.addColumn("name", "string").set("value", "sheet_name");
+
+			URL inFile = getClass().getResource(excelFile);
+			List<OutputRecord> result = tester.runParser(inFile, parser);
+
+			OutputRecord record = result.get(0);
+			assertThat(record.getAsString("name"), is("test1"));
+		}
+	}
 }
