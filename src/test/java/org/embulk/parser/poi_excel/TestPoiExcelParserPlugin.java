@@ -74,6 +74,32 @@ public class TestPoiExcelParserPlugin {
 	}
 
 	@Theory
+	public void testNumricFormat(String excelFile) throws ParseException {
+		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
+			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
+
+			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
+			parser.set("sheets", Arrays.asList("test1"));
+			parser.set("skip_header_lines", 1);
+			parser.addColumn("value", "string").set("column_number", "C").set("numeric_format", "%.2f");
+
+			URL inFile = getClass().getResource(excelFile);
+			List<OutputRecord> result = tester.runParser(inFile, parser);
+
+			assertThat(result.size(), is(7));
+			checkNumricFormat(result, 0, "123.40");
+			checkNumricFormat(result, 1, "456.70");
+			checkNumricFormat(result, 2, "123.00");
+		}
+	}
+
+	private void checkNumricFormat(List<OutputRecord> result, int index, String s) {
+		OutputRecord r = result.get(index);
+		// System.out.println(r);
+		assertThat(r.getAsString("value"), is(s));
+	}
+
+	@Theory
 	public void testRowNumber(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);

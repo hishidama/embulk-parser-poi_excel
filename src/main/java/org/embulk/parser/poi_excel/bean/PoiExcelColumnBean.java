@@ -231,6 +231,23 @@ public class PoiExcelColumnBean {
 		return attributeName.get();
 	}
 
+	private CacheValue<String> numericFormat = new CacheValue<String>() {
+
+		@Override
+		protected Optional<String> getTaskValue(ColumnCommonOptionTask task) {
+			return task.getNumericFormat();
+		}
+
+		@Override
+		protected String getDefaultValue() {
+			return "";
+		}
+	};
+
+	public String getNumericFormat() {
+		return numericFormat.get();
+	}
+
 	private CacheValue<Boolean> searchMergedCell = new CacheValue<Boolean>() {
 
 		@Override

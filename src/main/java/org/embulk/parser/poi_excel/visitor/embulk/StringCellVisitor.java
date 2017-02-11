@@ -1,8 +1,11 @@
 package org.embulk.parser.poi_excel.visitor.embulk;
 
+import java.text.MessageFormat;
+
 import org.apache.poi.ss.usermodel.FormulaError;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
+import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
 import org.embulk.parser.poi_excel.visitor.PoiExcelVisitorValue;
 import org.embulk.spi.Column;
 
@@ -14,11 +17,31 @@ public class StringCellVisitor extends CellVisitor {
 
 	@Override
 	public void visitCellValueNumeric(Column column, Object source, double value) {
+		String s = toString(column, source, value);
+		pageBuilder.setString(column, s);
+	}
+
+	protected String toString(Column column, Object source, double value) {
+		String format = getNumericFormat(column);
+		if (!format.isEmpty()) {
+			try {
+				return String.format(format, value);
+			} catch (Exception e) {
+				throw new IllegalArgumentException(MessageFormat.format(
+						"illegal String.format for double. numeric_format=\"{0}\"", format), e);
+			}
+		}
+
 		String s = Double.toString(value);
 		if (s.endsWith(".0")) {
-			s = s.substring(0, s.length() - 2);
+			return s.substring(0, s.length() - 2);
 		}
-		pageBuilder.setString(column, s);
+		return s;
+	}
+
+	protected String getNumericFormat(Column column) {
+		PoiExcelColumnBean bean = visitorValue.getColumnBean(column);
+		return bean.getNumericFormat();
 	}
 
 	@Override

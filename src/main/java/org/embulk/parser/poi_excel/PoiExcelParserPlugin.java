@@ -103,6 +103,10 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 	}
 
 	public interface ColumnCommonOptionTask extends Task {
+		// format of numeric(double) to string
+		@Config("numeric_format")
+		@ConfigDefault("null")
+		public Optional<String> getNumericFormat();
 
 		// search merged cell if cellType=BLANK
 		@Config("search_merged_cell")
