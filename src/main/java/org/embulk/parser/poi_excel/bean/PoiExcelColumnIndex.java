@@ -51,6 +51,8 @@ public class PoiExcelColumnIndex {
 						break;
 					case CELL_VALUE:
 					case CELL_FORMULA:
+					case CELL_TYPE:
+					case CELL_CACHED_TYPE:
 					case COLUMN_NUMBER:
 						log.info("column.name={} <- cell_column={}, value_type={}", column.getName(), c, valueType);
 						break;

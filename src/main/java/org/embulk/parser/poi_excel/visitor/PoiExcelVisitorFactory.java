@@ -159,6 +159,20 @@ public class PoiExcelVisitorFactory {
 		return new PoiExcelCellCommentVisitor(visitorValue);
 	}
 
+	// cell type
+	private PoiExcelCellTypeVisitor poiExcelCellTypeVisitor;
+
+	public final PoiExcelCellTypeVisitor getPoiExcelCellTypeVisitor() {
+		if (poiExcelCellTypeVisitor == null) {
+			poiExcelCellTypeVisitor = newPoiExcelCellTypeVisitor();
+		}
+		return poiExcelCellTypeVisitor;
+	}
+
+	protected PoiExcelCellTypeVisitor newPoiExcelCellTypeVisitor() {
+		return new PoiExcelCellTypeVisitor(visitorValue);
+	}
+
 	// ClientAnchor
 	private PoiExcelClientAnchorVisitor poiExcelClientAnchorVisitor;
 

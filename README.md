@@ -58,6 +58,8 @@ if omit **column_number** when **value** is `cell_value`, specified next column.
 * `cell_style`: all cell style attributes. returned json string. see **attribute_name**. (**type** required `string`)
 * `cell_font`: all cell font attributes. returned json string. see **attribute_name**. (**type** required `string`)
 * `cell_comment`: all cell comment attributes. returned json string. see **attribute_name**. (**type** required `string`)
+* `cell_type`: cell type. returned Cell.getCellType() of POI.
+* `cell_cached_type`: cell cached formula result type. returned Cell.getCachedFormulaResultType() of POI when CellType==FORMULA, otherwise same as cell_type(returned Cell.getCellType()).
 * `sheet_name`: sheet name.
 * `row_number`: row number(1 origin).
 * `column_number`: column number(1 origin).

@@ -117,6 +117,16 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		case CELL_COMMENT:
 			visitCellComment(bean, cell, visitor);
 			return;
+		case CELL_TYPE:
+			visitCellType(bean, cell, cell.getCellType(), visitor);
+			return;
+		case CELL_CACHED_TYPE:
+			if (cell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+				visitCellType(bean, cell, cell.getCachedFormulaResultType(), visitor);
+			} else {
+				visitCellType(bean, cell, cell.getCellType(), visitor);
+			}
+			return;
 		default:
 			throw new UnsupportedOperationException(MessageFormat.format("unsupported value_type={0}", valueType));
 		}
@@ -152,5 +162,10 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 	private void visitCellComment(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		PoiExcelCellCommentVisitor delegator = factory.getPoiExcelCellCommentVisitor();
 		delegator.visit(bean, cell, visitor);
+	}
+
+	private void visitCellType(PoiExcelColumnBean bean, Cell cell, int cellType, CellVisitor visitor) {
+		PoiExcelCellTypeVisitor delegator = factory.getPoiExcelCellTypeVisitor();
+		delegator.visit(bean, cell, cellType, visitor);
 	}
 }

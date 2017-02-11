@@ -11,6 +11,10 @@ public enum PoiExcelColumnValueType {
 	CELL_FONT(true, false),
 	/** cell comment */
 	CELL_COMMENT(true, false),
+	/** cell type */
+	CELL_TYPE(true, false),
+	/** cell CachedFormulaResultType */
+	CELL_CACHED_TYPE(true, false),
 	/** sheet name */
 	SHEET_NAME(false, false),
 	/** row number (1 origin) */
