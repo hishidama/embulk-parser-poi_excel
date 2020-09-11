@@ -47,10 +47,11 @@ if omit **column_number** when **value** is `cell_value`, specified next column.
 * **numeric_format**: format of numeric(double) to string such as `%4.2f`. (default: Java's Double.toString())
 * **attribute_name**: use with value `cell_style`, `cell_font`, etc. see below. (list of string)
 * **on_cell_error**: processing method of Cell error. see below. (string, default: `constant`)
-* **formula_handling** : processing method of formula. see below. (`evaluate` or `cashed_value`. default: `evaluate`)
+* **formula_handling**: processing method of formula. see below. (`evaluate` or `cashed_value`. default: `evaluate`)
 * **on_evaluate_error**: processing method of evaluate formula error. see below. (string, default: `exception`)
-* **formula_replace** : replace formula before evaluate. see below.
+* **formula_replace**: replace formula before evaluate. see below.
 * **on_convert_error**: processing method of convert error. see below. (string, default: `exception`)
+* **search_merged_cell**: if true, search merged cell when cell is BLANK. (boolean, default: `true`)
 
 ### value
 
