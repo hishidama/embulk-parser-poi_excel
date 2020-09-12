@@ -51,7 +51,7 @@ if omit **column_number** when **value** is `cell_value`, specified next column.
 * **on_evaluate_error**: processing method of evaluate formula error. see below. (string, default: `exception`)
 * **formula_replace**: replace formula before evaluate. see below.
 * **on_convert_error**: processing method of convert error. see below. (string, default: `exception`)
-* **search_merged_cell**: if true, search merged cell when cell is BLANK. (boolean, default: `true`)
+* **search_merged_cell**: search merged cell when cell is BLANK. one of `none`, `linear_search`, `tree_search`. (string, default: `tree_search`)
 
 ### value
 
@@ -127,7 +127,7 @@ Processing method of Cell error (`#DIV/0!`, `#REF!`, etc).
 ```
 
 * `constant`: set null. (default)
-* `constant.`*value*: set value.
+* `constant.`*value*: set specified value.
 * `error_code`: set error code.
 * `exception`: throw exception.
 
@@ -187,7 +187,7 @@ Processing method of convert error. ex) Excel boolean to Embulk timestamp
 
 ### sheet_options
 
-Options of indivisual sheet.
+Options of individual sheet.
 
 ```yaml
   parser:
@@ -211,7 +211,7 @@ Options of indivisual sheet.
 ```
 
 **sheet_options** is map of sheet name.  
-Map values are **skip_header_lines**, **colums**.
+Map values are **skip_header_lines**, **columns**.
 
 **columns** is map of column name.  
 Map values are same **columns** in **parser** (excluding `name`, `type`).

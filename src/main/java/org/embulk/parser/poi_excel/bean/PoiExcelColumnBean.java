@@ -248,20 +248,45 @@ public class PoiExcelColumnBean {
 		return numericFormat.get();
 	}
 
-	private CacheValue<Boolean> searchMergedCell = new CacheValue<Boolean>() {
+	public enum SearchMergedCell {
+		NONE, LINEAR_SEARCH, TREE_SEARCH
+	}
+
+	private CacheValue<SearchMergedCell> searchMergedCell = new CacheValue<SearchMergedCell>() {
 
 		@Override
-		protected Optional<Boolean> getTaskValue(ColumnCommonOptionTask task) {
-			return task.getSearchMergedCell();
+		protected Optional<SearchMergedCell> getTaskValue(ColumnCommonOptionTask task) {
+			Optional<String> option = task.getSearchMergedCell();
+			String value = option.or("null").trim();
+			switch (value.toLowerCase()) {
+			case "null":
+				return Optional.absent();
+			case "true": // compatibility ver 0.1.7
+				return Optional.of(getDefaultValue());
+			case "false": // compatibility ver 0.1.7
+				return Optional.of(SearchMergedCell.NONE);
+			default:
+				break;
+			}
+			try {
+				return Optional.of(SearchMergedCell.valueOf(value.toUpperCase()));
+			} catch (Exception e) {
+				List<String> list = new ArrayList<>();
+				for (SearchMergedCell s : SearchMergedCell.values()) {
+					list.add(s.name().toLowerCase());
+				}
+				throw new ConfigException(MessageFormat.format("illegal search_merged_cell={0}. expected={1}", value,
+						list), e);
+			}
 		}
 
 		@Override
-		protected Boolean getDefaultValue() {
-			return true;
+		protected SearchMergedCell getDefaultValue() {
+			return SearchMergedCell.TREE_SEARCH;
 		}
 	};
 
-	public boolean getSearchMergedCell() {
+	public SearchMergedCell getSearchMergedCell() {
 		return searchMergedCell.get();
 	}
 

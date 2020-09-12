@@ -111,7 +111,7 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		// search merged cell if cellType=BLANK
 		@Config("search_merged_cell")
 		@ConfigDefault("null")
-		public Optional<Boolean> getSearchMergedCell();
+		public Optional<String> getSearchMergedCell();
 
 		@Config("formula_handling")
 		@ConfigDefault("null")

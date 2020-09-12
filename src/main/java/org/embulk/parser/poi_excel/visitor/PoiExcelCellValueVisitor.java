@@ -17,7 +17,9 @@ import org.embulk.parser.poi_excel.PoiExcelParserPlugin.FormulaReplaceTask;
 import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
 import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean.ErrorStrategy;
 import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean.FormulaHandling;
+import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean.SearchMergedCell;
 import org.embulk.parser.poi_excel.visitor.embulk.CellVisitor;
+import org.embulk.parser.poi_excel.visitor.util.MergedRegionMap;
 import org.embulk.spi.Column;
 import org.embulk.spi.Exec;
 import org.embulk.spi.PageBuilder;
@@ -74,37 +76,64 @@ public class PoiExcelCellValueVisitor {
 
 		Column column = bean.getColumn();
 
-		boolean search = bean.getSearchMergedCell();
-		if (!search) {
-			visitor.visitCellValueBlank(column, cell);
-			return;
-		}
+		CellRangeAddress region = findRegion(bean, cell);
+		if (region != null) {
+			Row firstRow = cell.getSheet().getRow(region.getFirstRow());
+			if (firstRow == null) {
+				visitCellNull(column);
+				return;
+			}
+			Cell firstCell = firstRow.getCell(region.getFirstColumn());
+			if (firstCell == null) {
+				visitCellNull(column);
+				return;
+			}
 
-		int r = cell.getRowIndex();
-		int c = cell.getColumnIndex();
-
-		Sheet sheet = cell.getSheet();
-		int size = sheet.getNumMergedRegions();
-		for (int i = 0; i < size; i++) {
-			CellRangeAddress range = visitorValue.getSheet().getMergedRegion(i);
-			if (range.isInRange(r, c)) {
-				Row firstRow = sheet.getRow(range.getFirstRow());
-				if (firstRow == null) {
-					visitCellNull(column);
-					return;
-				}
-				Cell firstCell = firstRow.getCell(range.getFirstColumn());
-				if (firstCell == null) {
-					visitCellNull(column);
-					return;
-				}
-
+			if (firstCell.getRowIndex() != cell.getRowIndex() || firstCell.getColumnIndex() != cell.getColumnIndex()) {
 				visitCellValue(bean, firstCell, visitor);
 				return;
 			}
 		}
 
 		visitor.visitCellValueBlank(column, cell);
+	}
+
+	protected CellRangeAddress findRegion(PoiExcelColumnBean bean, Cell cell) {
+		SearchMergedCell search = bean.getSearchMergedCell();
+		switch (search) {
+		case NONE:
+			return null;
+		case LINEAR_SEARCH:
+			return findRegionLinearSearch(bean, cell);
+		default:
+			return findRegionTreeSearch(bean, cell);
+		}
+	}
+
+	protected CellRangeAddress findRegionLinearSearch(PoiExcelColumnBean bean, Cell cell) {
+		Sheet sheet = cell.getSheet();
+		int r = cell.getRowIndex();
+		int c = cell.getColumnIndex();
+
+		int size = sheet.getNumMergedRegions();
+		for (int i = 0; i < size; i++) {
+			CellRangeAddress region = sheet.getMergedRegion(i);
+			if (region.isInRange(r, c)) {
+				return region;
+			}
+		}
+
+		return null;
+	}
+
+	private final MergedRegionMap mergedRegionMap = new MergedRegionMap();
+
+	protected CellRangeAddress findRegionTreeSearch(PoiExcelColumnBean bean, Cell cell) {
+		Sheet sheet = cell.getSheet();
+		int r = cell.getRowIndex();
+		int c = cell.getColumnIndex();
+
+		return mergedRegionMap.get(sheet, r, c);
 	}
 
 	protected void visitCellValueFormula(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {

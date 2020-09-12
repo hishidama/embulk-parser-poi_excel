@@ -140,56 +140,6 @@ public class TestPoiExcelParserPlugin {
 	}
 
 	@Theory
-	public void testSearchMergedCell_true(String excelFile) throws ParseException {
-		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
-			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
-
-			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
-			parser.set("sheet", "merged_cell");
-			parser.addColumn("a", "string");
-			parser.addColumn("b", "string");
-
-			URL inFile = getClass().getResource(excelFile);
-			List<OutputRecord> result = tester.runParser(inFile, parser);
-
-			assertThat(result.size(), is(4));
-			check6(result, 0, "test3-a1", "test3-a1");
-			check6(result, 1, "data", "0");
-			check6(result, 2, null, null);
-			check6(result, 3, null, null);
-		}
-	}
-
-	@Theory
-	public void testSearchMergedCell_false(String excelFile) throws ParseException {
-		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
-			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
-
-			EmbulkTestParserConfig parser = tester.newParserConfig(PoiExcelParserPlugin.TYPE);
-			parser.set("sheet", "merged_cell");
-			parser.set("search_merged_cell", false);
-			parser.addColumn("a", "string");
-			parser.addColumn("b", "string");
-
-			URL inFile = getClass().getResource(excelFile);
-			List<OutputRecord> result = tester.runParser(inFile, parser);
-
-			assertThat(result.size(), is(4));
-			check6(result, 0, "test3-a1", null);
-			check6(result, 1, "data", "0");
-			check6(result, 2, null, null);
-			check6(result, 3, null, null);
-		}
-	}
-
-	private void check6(List<OutputRecord> result, int index, String a, String b) {
-		OutputRecord r = result.get(index);
-		// System.out.println(r);
-		assertThat(r.getAsString("a"), is(a));
-		assertThat(r.getAsString("b"), is(b));
-	}
-
-	@Theory
 	public void test_sheets(String excelFile) throws ParseException {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);
