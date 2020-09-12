@@ -23,8 +23,8 @@ dependencies {
     provided "org.embulk:embulk-core:0.7.5"
     compile  "org.embulk:embulk-standards:0.7.5"
     // compile "YOUR_JAR_DEPENDENCY_GROUP:YOUR_JAR_DEPENDENCY_MODULE:YOUR_JAR_DEPENDENCY_VERSION"
-    compile group: 'org.apache.poi', name : 'poi', version: '3.13'
-    compile(group: 'org.apache.poi', name : 'poi-ooxml', version: '3.13') {
+    compile group: 'org.apache.poi', name : 'poi', version: '3.17'
+    compile(group: 'org.apache.poi', name : 'poi-ooxml', version: '3.17') {
         exclude group: 'stax', module: 'stax-api'
     }
     testCompile "junit:junit:4.+"

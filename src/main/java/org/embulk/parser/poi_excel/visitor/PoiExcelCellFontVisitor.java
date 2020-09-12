@@ -100,12 +100,6 @@ public class PoiExcelCellFontVisitor extends AbstractPoiExcelCellAttributeVisito
 				return (long) font.getIndex();
 			}
 		});
-		map.put("boldweight", new AttributeSupplier<Font>() {
-			@Override
-			public Object get(Column column, Cell cell, Font font) {
-				return (long) font.getBoldweight();
-			}
-		});
 		map.put("bold", new AttributeSupplier<Font>() {
 			@Override
 			public Object get(Column column, Cell cell, Font font) {

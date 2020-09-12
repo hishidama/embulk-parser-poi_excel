@@ -40,7 +40,7 @@ public class PoiExcelClientAnchorVisitor extends AbstractPoiExcelCellAttributeVi
 		map.put("anchor_type", new AttributeSupplier<ClientAnchor>() {
 			@Override
 			public Object get(Column column, Cell cell, ClientAnchor anchor) {
-				return (long) anchor.getAnchorType();
+				return (long) anchor.getAnchorType().value;
 			}
 		});
 		map.put("col1", new AttributeSupplier<ClientAnchor>() {

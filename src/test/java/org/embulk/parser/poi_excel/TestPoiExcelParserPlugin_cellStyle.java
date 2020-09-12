@@ -1,7 +1,7 @@
 package org.embulk.parser.poi_excel;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.net.URL;
@@ -9,7 +9,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.embulk.parser.EmbulkPluginTester;
 import org.embulk.parser.EmbulkTestOutputPlugin.OutputRecord;
 import org.embulk.parser.EmbulkTestParserConfig;
@@ -44,11 +44,11 @@ public class TestPoiExcelParserPlugin_cellStyle {
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(5));
-			check1(result, 0, "red", 255, 0, 0, "top", CellStyle.BORDER_THIN, 0, 0, 0);
+			check1(result, 0, "red", 255, 0, 0, "top", BorderStyle.THIN.getCode(), 0, 0, 0);
 			check1(result, 1, "green", 0, 128, 0, null, 0, 0, 0, 0);
-			check1(result, 2, "blue", 0, 0, 255, "left", 0, 0, CellStyle.BORDER_THIN, 0);
-			check1(result, 3, "white", 255, 255, 255, "right", 0, 0, 0, CellStyle.BORDER_THIN);
-			check1(result, 4, "black", 0, 0, 0, "bottom", 0, CellStyle.BORDER_MEDIUM, 0, 0);
+			check1(result, 2, "blue", 0, 0, 255, "left", 0, 0, BorderStyle.THIN.getCode(), 0);
+			check1(result, 3, "white", 255, 255, 255, "right", 0, 0, 0, BorderStyle.THIN.getCode());
+			check1(result, 4, "black", 0, 0, 0, "bottom", 0, BorderStyle.MEDIUM.getCode(), 0, 0);
 		}
 	}
 
@@ -81,11 +81,11 @@ public class TestPoiExcelParserPlugin_cellStyle {
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(5));
-			check2(result, 0, "red", 255, 0, 0, "top", CellStyle.BORDER_THIN, 0, 0, 0);
+			check2(result, 0, "red", 255, 0, 0, "top", BorderStyle.THIN.getCode(), 0, 0, 0);
 			check2(result, 1, "green", 0, 128, 0, null, 0, 0, 0, 0);
-			check2(result, 2, "blue", 0, 0, 255, "left", 0, 0, CellStyle.BORDER_THIN, 0);
-			check2(result, 3, "white", 255, 255, 255, "right", 0, 0, 0, CellStyle.BORDER_THIN);
-			check2(result, 4, "black", 0, 0, 0, "bottom", 0, CellStyle.BORDER_MEDIUM, 0, 0);
+			check2(result, 2, "blue", 0, 0, 255, "left", 0, 0, BorderStyle.THIN.getCode(), 0);
+			check2(result, 3, "white", 255, 255, 255, "right", 0, 0, 0, BorderStyle.THIN.getCode());
+			check2(result, 4, "black", 0, 0, 0, "bottom", 0, BorderStyle.MEDIUM.getCode(), 0, 0);
 		}
 	}
 
@@ -130,11 +130,11 @@ public class TestPoiExcelParserPlugin_cellStyle {
 			List<OutputRecord> result = tester.runParser(inFile, parser);
 
 			assertThat(result.size(), is(5));
-			check2(result, 0, "red", 255, 0, 0, "top", CellStyle.BORDER_THIN, 0, 0, 0);
+			check2(result, 0, "red", 255, 0, 0, "top", BorderStyle.THIN.getCode(), 0, 0, 0);
 			check2(result, 1, "green", 0, 128, 0, null, 0, 0, 0, 0);
-			check2(result, 2, "blue", 0, 0, 255, "left", 0, 0, CellStyle.BORDER_THIN, 0);
-			check2(result, 3, "white", 255, 255, 255, "right", 0, 0, 0, CellStyle.BORDER_THIN);
-			check2(result, 4, "black", 0, 0, 0, "bottom", 0, CellStyle.BORDER_MEDIUM, 0, 0);
+			check2(result, 2, "blue", 0, 0, 255, "left", 0, 0, BorderStyle.THIN.getCode(), 0);
+			check2(result, 3, "white", 255, 255, 255, "right", 0, 0, 0, BorderStyle.THIN.getCode());
+			check2(result, 4, "black", 0, 0, 0, "bottom", 0, BorderStyle.MEDIUM.getCode(), 0, 0);
 		}
 	}
 }

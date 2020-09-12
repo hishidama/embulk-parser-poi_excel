@@ -4,6 +4,7 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.FormulaError;
@@ -41,15 +42,15 @@ public class PoiExcelCellValueVisitor {
 
 		Column column = bean.getColumn();
 
-		int cellType = cell.getCellType();
+		CellType cellType = cell.getCellTypeEnum();
 		switch (cellType) {
-		case Cell.CELL_TYPE_NUMERIC:
+		case NUMERIC:
 			visitor.visitCellValueNumeric(column, cell, cell.getNumericCellValue());
 			return;
-		case Cell.CELL_TYPE_STRING:
+		case STRING:
 			visitor.visitCellValueString(column, cell, cell.getStringCellValue());
 			return;
-		case Cell.CELL_TYPE_FORMULA:
+		case FORMULA:
 			PoiExcelColumnValueType valueType = bean.getValueType();
 			if (valueType == PoiExcelColumnValueType.CELL_FORMULA) {
 				visitor.visitCellFormula(column, cell);
@@ -57,13 +58,13 @@ public class PoiExcelCellValueVisitor {
 				visitCellValueFormula(bean, cell, visitor);
 			}
 			return;
-		case Cell.CELL_TYPE_BLANK:
+		case BLANK:
 			visitCellValueBlank(bean, cell, visitor);
 			return;
-		case Cell.CELL_TYPE_BOOLEAN:
+		case BOOLEAN:
 			visitor.visitCellValueBoolean(column, cell, cell.getBooleanCellValue());
 			return;
-		case Cell.CELL_TYPE_ERROR:
+		case ERROR:
 			visitCellValueError(bean, cell, cell.getErrorCellValue(), visitor);
 			return;
 		default:
@@ -72,7 +73,7 @@ public class PoiExcelCellValueVisitor {
 	}
 
 	protected void visitCellValueBlank(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
-		assert cell.getCellType() == Cell.CELL_TYPE_BLANK;
+		assert cell.getCellTypeEnum() == CellType.BLANK;
 
 		Column column = bean.getColumn();
 
@@ -137,7 +138,7 @@ public class PoiExcelCellValueVisitor {
 	}
 
 	protected void visitCellValueFormula(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
-		assert cell.getCellType() == Cell.CELL_TYPE_FORMULA;
+		assert cell.getCellTypeEnum() == CellType.FORMULA;
 
 		FormulaHandling handling = bean.getFormulaHandling();
 		switch (handling) {
@@ -153,24 +154,24 @@ public class PoiExcelCellValueVisitor {
 	protected void visitCellValueFormulaCashedValue(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		Column column = bean.getColumn();
 
-		int cellType = cell.getCachedFormulaResultType();
+		CellType cellType = cell.getCachedFormulaResultTypeEnum();
 		switch (cellType) {
-		case Cell.CELL_TYPE_NUMERIC:
+		case NUMERIC:
 			visitor.visitCellValueNumeric(column, cell, cell.getNumericCellValue());
 			return;
-		case Cell.CELL_TYPE_STRING:
+		case STRING:
 			visitor.visitCellValueString(column, cell, cell.getStringCellValue());
 			return;
-		case Cell.CELL_TYPE_BLANK:
+		case BLANK:
 			visitCellValueBlank(bean, cell, visitor);
 			return;
-		case Cell.CELL_TYPE_BOOLEAN:
+		case BOOLEAN:
 			visitor.visitCellValueBoolean(column, cell, cell.getBooleanCellValue());
 			return;
-		case Cell.CELL_TYPE_ERROR:
+		case ERROR:
 			visitCellValueError(bean, cell, cell.getErrorCellValue(), visitor);
 			return;
-		case Cell.CELL_TYPE_FORMULA:
+		case FORMULA:
 		default:
 			throw new IllegalStateException(MessageFormat.format("unsupported POI cellType={0}", cellType));
 		}
@@ -227,24 +228,24 @@ public class PoiExcelCellValueVisitor {
 			throw new RuntimeException(MessageFormat.format("evaluate error. formula={0}", cell.getCellFormula()), e);
 		}
 
-		int cellType = cellValue.getCellType();
+		CellType cellType = cellValue.getCellTypeEnum();
 		switch (cellType) {
-		case Cell.CELL_TYPE_NUMERIC:
+		case NUMERIC:
 			visitor.visitCellValueNumeric(column, cellValue, cellValue.getNumberValue());
 			return;
-		case Cell.CELL_TYPE_STRING:
+		case STRING:
 			visitor.visitCellValueString(column, cellValue, cellValue.getStringValue());
 			return;
-		case Cell.CELL_TYPE_BLANK:
+		case BLANK:
 			visitor.visitCellValueBlank(column, cellValue);
 			return;
-		case Cell.CELL_TYPE_BOOLEAN:
+		case BOOLEAN:
 			visitor.visitCellValueBoolean(column, cellValue, cellValue.getBooleanValue());
 			return;
-		case Cell.CELL_TYPE_ERROR:
+		case ERROR:
 			visitCellValueError(bean, cellValue, cellValue.getErrorValue(), visitor);
 			return;
-		case Cell.CELL_TYPE_FORMULA:
+		case FORMULA:
 		default:
 			throw new IllegalStateException(MessageFormat.format("unsupported POI cellType={0}", cellType));
 		}

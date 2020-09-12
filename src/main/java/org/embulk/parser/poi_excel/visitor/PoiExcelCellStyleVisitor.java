@@ -41,16 +41,16 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 		map.put("alignment", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return (long) style.getAlignment();
+				return (long) style.getAlignmentEnum().getCode();
 			}
 		});
 		map.put("border", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				int n0 = style.getBorderTop();
-				int n1 = style.getBorderBottom();
-				int n2 = style.getBorderLeft();
-				int n3 = style.getBorderRight();
+				int n0 = style.getBorderTopEnum().getCode();
+				int n1 = style.getBorderBottomEnum().getCode();
+				int n2 = style.getBorderLeftEnum().getCode();
+				int n3 = style.getBorderRightEnum().getCode();
 				if (column.getType() instanceof StringType) {
 					return String.format("%02x%02x%02x%02x", n0, n1, n2, n3);
 				}
@@ -60,25 +60,25 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 		map.put("border_bottom", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return (long) style.getBorderBottom();
+				return (long) style.getBorderBottomEnum().getCode();
 			}
 		});
 		map.put("border_left", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return (long) style.getBorderLeft();
+				return (long) style.getBorderLeftEnum().getCode();
 			}
 		});
 		map.put("border_right", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return (long) style.getBorderRight();
+				return (long) style.getBorderRightEnum().getCode();
 			}
 		});
 		map.put("border_top", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return (long) style.getBorderTop();
+				return (long) style.getBorderTopEnum().getCode();
 			}
 		});
 		map.put("border_bottom_color", new AttributeSupplier<CellStyle>() {
@@ -154,7 +154,7 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 		map.put("fill_pattern", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return (long) style.getFillPattern();
+				return (long) style.getFillPatternEnum().getCode();
 			}
 		});
 		map.put("font_index", new AttributeSupplier<CellStyle>() {
@@ -190,7 +190,7 @@ public class PoiExcelCellStyleVisitor extends AbstractPoiExcelCellAttributeVisit
 		map.put("vertical_alignment", new AttributeSupplier<CellStyle>() {
 			@Override
 			public Object get(Column column, Cell cell, CellStyle style) {
-				return (long) style.getVerticalAlignment();
+				return (long) style.getVerticalAlignmentEnum().getCode();
 			}
 		});
 		map.put("wrap_text", new AttributeSupplier<CellStyle>() {

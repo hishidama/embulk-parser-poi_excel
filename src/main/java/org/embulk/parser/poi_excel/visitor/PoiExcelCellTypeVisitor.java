@@ -1,6 +1,7 @@
 package org.embulk.parser.poi_excel.visitor;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
 import org.embulk.parser.poi_excel.visitor.embulk.CellVisitor;
 import org.embulk.spi.Column;
@@ -16,23 +17,36 @@ public class PoiExcelCellTypeVisitor {
 		this.pageBuilder = visitorValue.getPageBuilder();
 	}
 
-	private static final String[] CELL_TYPE_STRING = { "NUMERIC", "STRING", "FORMULA", "BLANK", "BOOLEAN", "ERROR" };
-
-	public void visit(PoiExcelColumnBean bean, Cell cell, int cellType, CellVisitor visitor) {
+	public void visit(PoiExcelColumnBean bean, Cell cell, CellType cellType, CellVisitor visitor) {
 		assert cell != null;
 
 		Column column = bean.getColumn();
 		if (column.getType() instanceof StringType) {
-			String type;
-			if (0 <= cellType && cellType < CELL_TYPE_STRING.length) {
-				type = CELL_TYPE_STRING[cellType];
-			} else {
-				type = Integer.toString(cellType);
-			}
+			String type = cellType.name();
 			visitor.visitCellValueString(column, cell, type);
 			return;
 		}
 
-		visitor.visitCellValueNumeric(column, cell, cellType);
+		int code = getCode(cellType);
+		visitor.visitCellValueNumeric(column, cell, code);
+	}
+
+	private static int getCode(CellType cellType) {
+		switch (cellType) {
+		case NUMERIC:
+			return 0;
+		case STRING:
+			return 1;
+		case FORMULA:
+			return 2;
+		case BLANK:
+			return 3;
+		case BOOLEAN:
+			return 4;
+		case ERROR:
+			return 5;
+		default:
+			return -1;
+		}
 	}
 }
