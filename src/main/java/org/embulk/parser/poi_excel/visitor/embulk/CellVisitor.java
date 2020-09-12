@@ -3,6 +3,7 @@ package org.embulk.parser.poi_excel.visitor.embulk;
 import java.text.MessageFormat;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.embulk.config.ConfigException;
 import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
 import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean.ErrorStrategy;
@@ -39,6 +40,8 @@ public abstract class CellVisitor {
 	public abstract void visitValueLong(Column column, Object source, long value);
 
 	public abstract void visitSheetName(Column column);
+
+	public abstract void visitSheetName(Column column, Sheet sheet);
 
 	public abstract void visitRowNumber(Column column, int index1);
 

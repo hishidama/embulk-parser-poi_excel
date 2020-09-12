@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.poi.ss.util.CellReference;
 import org.embulk.parser.poi_excel.PoiExcelColumnValueType;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.PluginTask;
+import org.embulk.parser.poi_excel.bean.util.PoiExcelCellAddress;
 import org.embulk.spi.Column;
 import org.embulk.spi.Exec;
 import org.embulk.spi.Schema;
@@ -36,45 +37,10 @@ public class PoiExcelColumnIndex {
 				}
 				bean.setColumnIndex(index);
 				indexMap.put(column.getName(), index);
-				if (log.isInfoEnabled()) {
-					String c = CellReference.convertNumToColString(index);
-					switch (valueType) {
-					default:
-						String suffix = bean.getValueTypeSuffix();
-						if (suffix != null) {
-							log.info("column.name={} <- cell_column={}, value_type={}, value=[{}]", column.getName(),
-									c, valueType, suffix);
-						} else {
-							log.info("column.name={} <- cell_column={}, value_type={}, value={}", column.getName(), c,
-									valueType, suffix);
-						}
-						break;
-					case CELL_VALUE:
-					case CELL_FORMULA:
-					case CELL_TYPE:
-					case CELL_CACHED_TYPE:
-					case COLUMN_NUMBER:
-						log.info("column.name={} <- cell_column={}, value_type={}", column.getName(), c, valueType);
-						break;
-					}
-				}
-			} else {
-				if (log.isInfoEnabled()) {
-					switch (valueType) {
-					default:
-						String suffix = bean.getValueTypeSuffix();
-						if (suffix != null) {
-							log.info("column.name={} <- value_type={}, value=[{}]", column.getName(), valueType, suffix);
-						} else {
-							log.info("column.name={} <- value_type={}, value={}", column.getName(), valueType, suffix);
-						}
-						break;
-					case SHEET_NAME:
-					case ROW_NUMBER:
-						log.info("column.name={} <- value_type={}", column.getName(), valueType);
-						break;
-					}
-				}
+			}
+
+			if (log.isInfoEnabled()) {
+				logColumn(column, bean, valueType, index);
 			}
 		}
 	}
@@ -82,6 +48,15 @@ public class PoiExcelColumnIndex {
 	protected int resolveColumnIndex(Column column, PoiExcelColumnBean bean, int index,
 			PoiExcelColumnValueType valueType) {
 		Optional<String> numberOption = bean.getColumnNumber();
+		PoiExcelCellAddress cellAddress = bean.getCellAddress();
+
+		if (cellAddress != null) {
+			if (numberOption.isPresent()) {
+				throw new RuntimeException("only one of column_number, cell_address can be specified");
+			}
+			return index;
+		}
+
 		if (numberOption.isPresent()) {
 			String columnNumber = numberOption.get();
 			if (columnNumber.length() >= 1) {
@@ -191,5 +166,65 @@ public class PoiExcelColumnIndex {
 					column));
 		}
 		return index;
+	}
+
+	protected void logColumn(Column column, PoiExcelColumnBean bean, PoiExcelColumnValueType valueType, int index) {
+		PoiExcelCellAddress cellAddress = bean.getCellAddress();
+
+		String cname, cvalue;
+		if (cellAddress != null) {
+			cname = "cell_address";
+			cvalue = cellAddress.getString();
+		} else {
+			cname = "cell_column";
+			cvalue = CellReference.convertNumToColString(index);
+		}
+
+		switch (valueType) {
+		default:
+		case CELL_VALUE:
+		case CELL_FORMULA:
+		case CELL_TYPE:
+		case CELL_CACHED_TYPE:
+		case COLUMN_NUMBER:
+			log.info("column.name={} <- {}={}, value_type={}", column.getName(), cname, cvalue, valueType);
+			break;
+		case CELL_STYLE:
+		case CELL_FONT:
+		case CELL_COMMENT:
+			String suffix = bean.getValueTypeSuffix();
+			if (suffix != null) {
+				log.info("column.name={} <- {}={}, value_type={}, value=[{}]", column.getName(), cname, cvalue,
+						valueType, suffix);
+			} else {
+				log.info("column.name={} <- {}={}, value_type={}, value={}", column.getName(), cname, cvalue,
+						valueType, suffix);
+			}
+			break;
+
+		case SHEET_NAME:
+			if (cellAddress != null && cellAddress.getSheetName() != null) {
+				log.info("column.name={} <- {}={}, value_type={}", column.getName(), cname, cvalue, valueType);
+			} else {
+				log.info("column.name={} <- value_type={}", column.getName(), valueType);
+			}
+			break;
+		case ROW_NUMBER:
+			if (cellAddress != null) {
+				log.info("column.name={} <- {}={}, value_type={}", column.getName(), cname, cvalue, valueType);
+			} else {
+				log.info("column.name={} <- value_type={}", column.getName(), valueType);
+			}
+			break;
+
+		case CONSTANT:
+			String value = bean.getValueTypeSuffix();
+			if (value != null) {
+				log.info("column.name={} <- value_type={}, value=[{}]", column.getName(), valueType, value);
+			} else {
+				log.info("column.name={} <- value_type={}, value={}", column.getName(), valueType, value);
+			}
+			break;
+		}
 	}
 }

@@ -45,6 +45,11 @@ public class LongCellVisitor extends CellVisitor {
 	@Override
 	public void visitSheetName(Column column) {
 		Sheet sheet = visitorValue.getSheet();
+		visitSheetName(column, sheet);
+	}
+
+	@Override
+	public void visitSheetName(Column column, Sheet sheet) {
 		int index = sheet.getWorkbook().getSheetIndex(sheet);
 		pageBuilder.setLong(column, index);
 	}

@@ -70,6 +70,11 @@ public class StringCellVisitor extends CellVisitor {
 	@Override
 	public void visitSheetName(Column column) {
 		Sheet sheet = visitorValue.getSheet();
+		visitSheetName(column, sheet);
+	}
+
+	@Override
+	public void visitSheetName(Column column, Sheet sheet) {
 		pageBuilder.setString(column, sheet.getSheetName());
 	}
 

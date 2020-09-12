@@ -4,9 +4,11 @@ import java.text.MessageFormat;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
 import org.embulk.parser.poi_excel.PoiExcelColumnValueType;
 import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
+import org.embulk.parser.poi_excel.bean.util.PoiExcelCellAddress;
 import org.embulk.parser.poi_excel.visitor.embulk.CellVisitor;
 import org.embulk.spi.Column;
 import org.embulk.spi.ColumnVisitor;
@@ -79,16 +81,44 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 	protected void visitCell(Column column, CellVisitor visitor) {
 		PoiExcelColumnBean bean = visitorValue.getColumnBean(column);
 		PoiExcelColumnValueType valueType = bean.getValueType();
+		PoiExcelCellAddress cellAddress = bean.getCellAddress();
 
 		switch (valueType) {
 		case SHEET_NAME:
-			visitor.visitSheetName(column);
+			if (cellAddress != null) {
+				Sheet sheet = cellAddress.getSheet(currentRow);
+				visitor.visitSheetName(column, sheet);
+			} else {
+				visitor.visitSheetName(column);
+			}
 			return;
 		case ROW_NUMBER:
-			visitor.visitRowNumber(column, currentRow.getRowNum() + 1);
+			int rowIndex;
+			if (cellAddress != null) {
+				Cell cell = cellAddress.getCell(currentRow);
+				if (cell == null) {
+					visitCellNull(column);
+					return;
+				}
+				rowIndex = cell.getRowIndex();
+			} else {
+				rowIndex = currentRow.getRowNum();
+			}
+			visitor.visitRowNumber(column, rowIndex + 1);
 			return;
 		case COLUMN_NUMBER:
-			visitor.visitColumnNumber(column, bean.getColumnIndex() + 1);
+			int columnIndex;
+			if (cellAddress != null) {
+				Cell cell = cellAddress.getCell(currentRow);
+				if (cell == null) {
+					visitCellNull(column);
+					return;
+				}
+				columnIndex = cell.getColumnIndex();
+			} else {
+				columnIndex = bean.getColumnIndex();
+			}
+			visitor.visitColumnNumber(column, columnIndex + 1);
 			return;
 		case CONSTANT:
 			visitCellConstant(column, bean.getValueTypeSuffix(), visitor);
@@ -98,7 +128,12 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		}
 
 		assert valueType.useCell();
-		Cell cell = currentRow.getCell(bean.getColumnIndex());
+		Cell cell;
+		if (cellAddress != null) {
+			cell = cellAddress.getCell(currentRow);
+		} else {
+			cell = currentRow.getCell(bean.getColumnIndex());
+		}
 		if (cell == null) {
 			visitCellNull(column);
 			return;

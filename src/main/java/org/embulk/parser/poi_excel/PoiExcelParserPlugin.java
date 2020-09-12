@@ -96,6 +96,11 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		@ConfigDefault("null")
 		public Optional<String> getColumnNumber();
 
+		// A1,B2,... or Sheet1!A1
+		@Config("cell_address")
+		@ConfigDefault("null")
+		public Optional<String> getCellAddress();
+
 		// use when value_type=cell_style, cell_font, ...
 		@Config("attribute_name")
 		@ConfigDefault("null")

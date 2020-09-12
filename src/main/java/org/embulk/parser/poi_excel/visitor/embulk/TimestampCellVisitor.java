@@ -61,6 +61,11 @@ public class TimestampCellVisitor extends CellVisitor {
 	@Override
 	public void visitSheetName(Column column) {
 		Sheet sheet = visitorValue.getSheet();
+		visitSheetName(column, sheet);
+	}
+
+	@Override
+	public void visitSheetName(Column column, Sheet sheet) {
 		doConvertError(column, sheet.getSheetName(), new UnsupportedOperationException(
 				"unsupported conversion sheet_name to Embulk timestamp"));
 	}

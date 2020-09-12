@@ -11,6 +11,7 @@ import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnCommonOptionTask;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.FormulaReplaceTask;
 import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean.ErrorStrategy.Strategy;
+import org.embulk.parser.poi_excel.bean.util.PoiExcelCellAddress;
 import org.embulk.spi.Column;
 
 import com.google.common.base.Optional;
@@ -102,6 +103,25 @@ public class PoiExcelColumnBean {
 			Optional<String> option = task.getColumnNumber();
 			if (option.isPresent()) {
 				return option;
+			}
+		}
+		return Optional.absent();
+	}
+
+	private Optional<PoiExcelCellAddress> cellAddress;
+
+	public PoiExcelCellAddress getCellAddress() {
+		if (cellAddress == null) {
+			this.cellAddress = initializeCellAddress();
+		}
+		return cellAddress.orNull();
+	}
+
+	protected Optional<PoiExcelCellAddress> initializeCellAddress() {
+		for (ColumnOptionTask task : columnTaskList) {
+			Optional<String> option = task.getCellAddress();
+			if (option.isPresent()) {
+				return Optional.of(new PoiExcelCellAddress(option.get()));
 			}
 		}
 		return Optional.absent();

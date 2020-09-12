@@ -44,6 +44,7 @@ if omit **column_number** when **value** is `cell_value`, specified next column.
 * **type**: Embulk column type. (string, required)
 * **value**: value type. see below. (string, defualt: `cell_value`)
 * **column_number**: Excel column number. see below. (string, default: next column)
+* **cell_address**: Excel cell address such as `A1`, `Sheet1!B3`. only one of `column_number`, `cell_address` can be specified. (string, not required)
 * **numeric_format**: format of numeric(double) to string such as `%4.2f`. (default: Java's Double.toString())
 * **attribute_name**: use with value `cell_style`, `cell_font`, etc. see below. (list of string)
 * **on_cell_error**: processing method of Cell error. see below. (string, default: `constant`)
