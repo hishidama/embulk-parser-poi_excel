@@ -52,7 +52,7 @@ if omit **column_number** when **value** is `cell_value`, specified next column.
 * **on_evaluate_error**: processing method of evaluate formula error. see below. (string, default: `exception`)
 * **formula_replace**: replace formula before evaluate. see below.
 * **on_convert_error**: processing method of convert error. see below. (string, default: `exception`)
-* **search_merged_cell**: search merged cell when cell is BLANK. one of `none`, `linear_search`, `tree_search`. (string, default: `tree_search`)
+* **search_merged_cell**: search merged cell when cell is BLANK. (`none`, `linear_search` or `tree_search`, default: `tree_search`)
 
 ### value
 
