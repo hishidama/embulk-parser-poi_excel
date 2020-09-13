@@ -1,16 +1,16 @@
 package org.embulk.parser.poi_excel.visitor.util;
 
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 
-public class MergedRegionMap {
+public abstract class MergedRegionMap implements MergedRegionFinder {
 
 	private final Map<Sheet, Map<Integer, Map<Integer, CellRangeAddress>>> sheetMap = new ConcurrentHashMap<>();
 
+	@Override
 	public CellRangeAddress get(Sheet sheet, int rowIndex, int columnIndex) {
 		Map<Integer, Map<Integer, CellRangeAddress>> rowMap = sheetMap.get(sheet);
 		if (rowMap == null) {
@@ -28,7 +28,7 @@ public class MergedRegionMap {
 	}
 
 	protected Map<Integer, Map<Integer, CellRangeAddress>> createRowMap(Sheet sheet) {
-		Map<Integer, Map<Integer, CellRangeAddress>> rowMap = new TreeMap<>();
+		Map<Integer, Map<Integer, CellRangeAddress>> rowMap = newRowMap();
 
 		for (int i = sheet.getNumMergedRegions() - 1; i >= 0; i--) {
 			CellRangeAddress region = sheet.getMergedRegion(i);
@@ -36,7 +36,7 @@ public class MergedRegionMap {
 			for (int r = region.getFirstRow(); r <= region.getLastRow(); r++) {
 				Map<Integer, CellRangeAddress> columnMap = rowMap.get(r);
 				if (columnMap == null) {
-					columnMap = new TreeMap<>();
+					columnMap = newColumnMap();
 					rowMap.put(r, columnMap);
 				}
 
@@ -48,4 +48,8 @@ public class MergedRegionMap {
 
 		return rowMap;
 	}
+
+	protected abstract Map<Integer, Map<Integer, CellRangeAddress>> newRowMap();
+
+	protected abstract Map<Integer, CellRangeAddress> newColumnMap();
 }

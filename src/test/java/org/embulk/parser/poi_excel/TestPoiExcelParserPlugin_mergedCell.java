@@ -53,6 +53,11 @@ public class TestPoiExcelParserPlugin_mergedCell {
 		test(excelFile, "tree_search", true);
 	}
 
+	@Theory
+	public void testSearchMergedCell_hash(String excelFile) throws ParseException {
+		test(excelFile, "hash_search", true);
+	}
+
 	private void test(String excelFile, Object arg, boolean search) {
 		try (EmbulkPluginTester tester = new EmbulkPluginTester()) {
 			tester.addParserPlugin(PoiExcelParserPlugin.TYPE, PoiExcelParserPlugin.class);

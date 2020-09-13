@@ -12,6 +12,8 @@ import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.FormulaReplaceTask;
 import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean.ErrorStrategy.Strategy;
 import org.embulk.parser.poi_excel.bean.util.PoiExcelCellAddress;
+import org.embulk.parser.poi_excel.bean.util.SearchMergedCell;
+import org.embulk.parser.poi_excel.visitor.util.MergedRegionFinder;
 import org.embulk.spi.Column;
 
 import com.google.common.base.Optional;
@@ -268,10 +270,6 @@ public class PoiExcelColumnBean {
 		return numericFormat.get();
 	}
 
-	public enum SearchMergedCell {
-		NONE, LINEAR_SEARCH, TREE_SEARCH
-	}
-
 	private CacheValue<SearchMergedCell> searchMergedCell = new CacheValue<SearchMergedCell>() {
 
 		@Override
@@ -302,12 +300,21 @@ public class PoiExcelColumnBean {
 
 		@Override
 		protected SearchMergedCell getDefaultValue() {
-			return SearchMergedCell.TREE_SEARCH;
+			return SearchMergedCell.HASH_SEARCH;
 		}
 	};
 
 	public SearchMergedCell getSearchMergedCell() {
 		return searchMergedCell.get();
+	}
+
+	private MergedRegionFinder mergedRegionFinder;
+
+	public MergedRegionFinder getMergedRegionFinder() {
+		if (mergedRegionFinder == null) {
+			this.mergedRegionFinder = getSearchMergedCell().getMergedRegionFinder();
+		}
+		return mergedRegionFinder;
 	}
 
 	public enum FormulaHandling {
