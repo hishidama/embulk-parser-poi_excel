@@ -13,7 +13,7 @@ configurations {
     provided
 }
 
-version = "0.1.11"
+version = "0.1.12"
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -55,6 +55,12 @@ task "package"(dependsOn: ["gemspec", "classpath"]) {
         println "> Build succeeded."
         println "> You can run embulk with '-L ${file(".").absolutePath}' argument."
     }
+}
+
+task gemUnpack(type: JRubyExec) {
+    jrubyArgs "-S"
+    script "gem"
+    scriptArgs "unpack", "pkg/${project.name}-${project.version}.gem"
 }
 
 task gemspec {

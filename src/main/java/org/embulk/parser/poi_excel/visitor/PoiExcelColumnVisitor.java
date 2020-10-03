@@ -4,11 +4,10 @@ import java.text.MessageFormat;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellReference;
 import org.embulk.parser.poi_excel.PoiExcelColumnValueType;
 import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
+import org.embulk.parser.poi_excel.bean.record.PoiExcelRecord;
 import org.embulk.parser.poi_excel.bean.util.PoiExcelCellAddress;
 import org.embulk.parser.poi_excel.visitor.embulk.CellVisitor;
 import org.embulk.spi.Column;
@@ -24,7 +23,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 	protected final PageBuilder pageBuilder;
 	protected final PoiExcelVisitorFactory factory;
 
-	protected Row currentRow;
+	protected PoiExcelRecord record;
 
 	public PoiExcelColumnVisitor(PoiExcelVisitorValue visitorValue) {
 		this.visitorValue = visitorValue;
@@ -32,8 +31,8 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		this.factory = visitorValue.getVisitorFactory();
 	}
 
-	public void setRow(Row row) {
-		this.currentRow = row;
+	public void setRecord(PoiExcelRecord record) {
+		this.record = record;
 	}
 
 	@Override
@@ -69,8 +68,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			visitCell(column, visitor);
 		} catch (Exception e) {
 			String sheetName = visitorValue.getSheet().getSheetName();
-			String ref = new CellReference(currentRow.getRowNum(), visitorValue.getColumnBean(column).getColumnIndex())
-					.formatAsString();
+			String ref = record.getCellReference(visitorValue.getColumnBean(column)).formatAsString();
 			throw new RuntimeException(MessageFormat.format("error at {0} cell={1}!{2}. {3}", column, sheetName, ref,
 					e.getMessage()), e);
 		}
@@ -87,7 +85,7 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		switch (valueType) {
 		case SHEET_NAME:
 			if (cellAddress != null) {
-				Sheet sheet = cellAddress.getSheet(currentRow);
+				Sheet sheet = cellAddress.getSheet(record);
 				visitor.visitSheetName(column, sheet);
 			} else {
 				visitor.visitSheetName(column);
@@ -96,28 +94,18 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		case ROW_NUMBER:
 			int rowIndex;
 			if (cellAddress != null) {
-				Cell cell = cellAddress.getCell(currentRow);
-				if (cell == null) {
-					visitCellNull(column);
-					return;
-				}
-				rowIndex = cell.getRowIndex();
+				rowIndex = cellAddress.getRowIndex();
 			} else {
-				rowIndex = currentRow.getRowNum();
+				rowIndex = record.getRowIndex(bean);
 			}
 			visitor.visitRowNumber(column, rowIndex + 1);
 			return;
 		case COLUMN_NUMBER:
 			int columnIndex;
 			if (cellAddress != null) {
-				Cell cell = cellAddress.getCell(currentRow);
-				if (cell == null) {
-					visitCellNull(column);
-					return;
-				}
-				columnIndex = cell.getColumnIndex();
+				columnIndex = cellAddress.getColumnIndex();
 			} else {
-				columnIndex = bean.getColumnIndex();
+				columnIndex = record.getColumnIndex(bean);
 			}
 			visitor.visitColumnNumber(column, columnIndex + 1);
 			return;
@@ -128,12 +116,12 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			break;
 		}
 
-		assert valueType.useCell();
+		// assert valueType.useCell();
 		Cell cell;
 		if (cellAddress != null) {
-			cell = cellAddress.getCell(currentRow);
+			cell = cellAddress.getCell(record);
 		} else {
-			cell = currentRow.getCell(bean.getColumnIndex());
+			cell = record.getCell(bean);
 		}
 		if (cell == null) {
 			visitCellNull(column);

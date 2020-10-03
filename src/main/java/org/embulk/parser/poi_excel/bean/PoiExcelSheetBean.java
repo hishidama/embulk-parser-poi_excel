@@ -11,6 +11,7 @@ import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnOptionTask;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.PluginTask;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.SheetCommonOptionTask;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.SheetOptionTask;
+import org.embulk.parser.poi_excel.bean.record.RecordType;
 import org.embulk.spi.Column;
 import org.embulk.spi.ColumnConfig;
 import org.embulk.spi.Schema;
@@ -75,11 +76,22 @@ public class PoiExcelSheetBean {
 			columnBeanList.add(bean);
 		}
 
-		new PoiExcelColumnIndex().initializeColumnIndex(task, columnBeanList);
+		new PoiExcelColumnIndex(this).initializeColumnIndex(task, columnBeanList);
 	}
 
 	public final List<SheetCommonOptionTask> getSheetOption() {
 		return sheetTaskList;
+	}
+
+	public RecordType getRecordType() {
+		List<SheetCommonOptionTask> list = getSheetOption();
+		for (SheetCommonOptionTask sheetTask : list) {
+			Optional<String> value = sheetTask.getRecordType();
+			if (value.isPresent()) {
+				return RecordType.of(value.get());
+			}
+		}
+		return RecordType.ROW;
 	}
 
 	public int getSkipHeaderLines() {

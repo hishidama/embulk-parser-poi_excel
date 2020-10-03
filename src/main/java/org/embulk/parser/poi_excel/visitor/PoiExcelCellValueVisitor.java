@@ -13,6 +13,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellReference;
 import org.embulk.parser.poi_excel.PoiExcelColumnValueType;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.FormulaReplaceTask;
 import org.embulk.parser.poi_excel.bean.PoiExcelColumnBean;
@@ -159,7 +160,13 @@ public class PoiExcelCellValueVisitor {
 				String regex = replace.getRegex();
 				String replacement = replace.getTo();
 
-				replacement = replacement.replace("${row}", Integer.toString(cell.getRowIndex() + 1));
+				if (replacement.contains("${row}")) {
+					replacement = replacement.replace("${row}", Integer.toString(cell.getRowIndex() + 1));
+				}
+				if (replacement.contains("${column}")) {
+					replacement = replacement.replace("${column}",
+							CellReference.convertNumToColString(cell.getColumnIndex() + 1));
+				}
 
 				formula = formula.replaceAll(regex, replacement);
 			}

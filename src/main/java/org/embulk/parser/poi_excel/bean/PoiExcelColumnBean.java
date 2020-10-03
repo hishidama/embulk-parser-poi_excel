@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.poi.ss.util.CellReference;
 import org.embulk.config.ConfigException;
 import org.embulk.parser.poi_excel.PoiExcelColumnValueType;
 import org.embulk.parser.poi_excel.PoiExcelParserPlugin.ColumnCommonOptionTask;
@@ -102,7 +103,23 @@ public class PoiExcelColumnBean {
 
 	public Optional<String> getColumnNumber() {
 		for (ColumnOptionTask task : columnTaskList) {
+			Optional<String> option = task.getCellColumn();
+			if (option.isPresent()) {
+				return option;
+			}
+		}
+		for (ColumnOptionTask task : columnTaskList) {
 			Optional<String> option = task.getColumnNumber();
+			if (option.isPresent()) {
+				return option;
+			}
+		}
+		return Optional.absent();
+	}
+
+	public Optional<String> getRowNumber() {
+		for (ColumnOptionTask task : columnTaskList) {
+			Optional<String> option = task.getCellRow();
 			if (option.isPresent()) {
 				return option;
 			}
@@ -123,10 +140,15 @@ public class PoiExcelColumnBean {
 		for (ColumnOptionTask task : columnTaskList) {
 			Optional<String> option = task.getCellAddress();
 			if (option.isPresent()) {
-				return Optional.of(new PoiExcelCellAddress(option.get()));
+				CellReference ref = new CellReference(option.get());
+				return Optional.of(new PoiExcelCellAddress(ref));
 			}
 		}
 		return Optional.absent();
+	}
+
+	public void setCellAddress(CellReference ref) {
+		this.cellAddress = Optional.of(new PoiExcelCellAddress(ref));
 	}
 
 	protected abstract class CacheValue<T> {

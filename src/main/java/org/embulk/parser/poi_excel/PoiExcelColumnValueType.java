@@ -1,5 +1,7 @@
 package org.embulk.parser.poi_excel;
 
+import org.embulk.parser.poi_excel.bean.record.RecordType;
+
 public enum PoiExcelColumnValueType {
 	/** cell value */
 	CELL_VALUE(true, true),
@@ -18,9 +20,25 @@ public enum PoiExcelColumnValueType {
 	/** sheet name */
 	SHEET_NAME(false, false),
 	/** row number (1 origin) */
-	ROW_NUMBER(false, false),
+	ROW_NUMBER(false, false) {
+		@Override
+		public boolean useCell(RecordType recordType) {
+			if (recordType == RecordType.COLUMN) {
+				return true;
+			}
+			return super.useCell(recordType);
+		}
+	},
 	/** column number (1 origin) */
-	COLUMN_NUMBER(true, false),
+	COLUMN_NUMBER(true, false) {
+		@Override
+		public boolean useCell(RecordType recordType) {
+			if (recordType == RecordType.ROW) {
+				return true;
+			}
+			return super.useCell(recordType);
+		}
+	},
 	/** constant */
 	CONSTANT(false, false);
 
@@ -32,7 +50,7 @@ public enum PoiExcelColumnValueType {
 		this.nextIndex = nextIndex;
 	}
 
-	public boolean useCell() {
+	public boolean useCell(RecordType recordType) {
 		return useCell;
 	}
 

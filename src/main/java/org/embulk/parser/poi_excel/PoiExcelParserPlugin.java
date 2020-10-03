@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -20,6 +19,8 @@ import org.embulk.config.ConfigException;
 import org.embulk.config.ConfigSource;
 import org.embulk.config.Task;
 import org.embulk.config.TaskSource;
+import org.embulk.parser.poi_excel.bean.PoiExcelSheetBean;
+import org.embulk.parser.poi_excel.bean.record.PoiExcelRecord;
 import org.embulk.parser.poi_excel.visitor.PoiExcelColumnVisitor;
 import org.embulk.parser.poi_excel.visitor.PoiExcelVisitorFactory;
 import org.embulk.parser.poi_excel.visitor.PoiExcelVisitorValue;
@@ -69,6 +70,10 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 
 	public interface SheetCommonOptionTask extends Task, ColumnCommonOptionTask {
 
+		@Config("record_type")
+		@ConfigDefault("null")
+		public Optional<String> getRecordType();
+
 		@Config("skip_header_lines")
 		@ConfigDefault("null")
 		public Optional<Integer> getSkipHeaderLines();
@@ -91,10 +96,24 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 		@ConfigDefault("null")
 		public Optional<String> getValueType();
 
-		// A,B,... or number(1 origin)
+		// same as cell_column
 		@Config("column_number")
 		@ConfigDefault("null")
 		public Optional<String> getColumnNumber();
+
+		public static final String CELL_COLUMN = "cell_column";
+
+		// A,B,... or number(1 origin)
+		@Config(CELL_COLUMN)
+		@ConfigDefault("null")
+		public Optional<String> getCellColumn();
+
+		public static final String CELL_ROW = "cell_row";
+
+		// number(1 origin)
+		@Config(CELL_ROW)
+		@ConfigDefault("null")
+		public Optional<String> getCellRow();
 
 		// A1,B2,... or Sheet1!A1
 		@Config("cell_address")
@@ -256,21 +275,18 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 				log.info("sheet={}", sheetName);
 				PoiExcelVisitorFactory factory = newPoiExcelVisitorFactory(task, schema, sheet, pageBuilder);
 				PoiExcelColumnVisitor visitor = factory.getPoiExcelColumnVisitor();
-				final int skipHeaderLines = factory.getVisitorValue().getSheetBean().getSkipHeaderLines();
+				PoiExcelSheetBean sheetBean = factory.getVisitorValue().getSheetBean();
+				final int skipHeaderLines = sheetBean.getSkipHeaderLines();
+
+				PoiExcelRecord record = sheetBean.getRecordType().newPoiExcelRecord();
+				record.initialize(sheet, skipHeaderLines);
+				visitor.setRecord(record);
 
 				int count = 0;
-				for (Row row : sheet) {
-					int rowIndex = row.getRowNum();
-					if (rowIndex < skipHeaderLines) {
-						log.debug("row({}) skipped", rowIndex);
-						continue;
-					}
-					if (log.isDebugEnabled()) {
-						log.debug("row({}) start", rowIndex);
-					}
+				for (; record.exists(); record.moveNext()) {
+					record.logStart();
 
-					visitor.setRow(row);
-					schema.visitColumns(visitor);
+					schema.visitColumns(visitor); // use record
 					pageBuilder.addRecord();
 
 					if (++count >= flushCount) {
@@ -279,9 +295,7 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 						count = 0;
 					}
 
-					if (log.isDebugEnabled()) {
-						log.debug("row({}) end", rowIndex);
-					}
+					record.logEnd();
 				}
 				pageBuilder.flush();
 			}
