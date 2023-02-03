@@ -42,7 +42,7 @@ public class PoiExcelCellValueVisitor {
 
 		Column column = bean.getColumn();
 
-		CellType cellType = cell.getCellTypeEnum();
+		CellType cellType = cell.getCellType();
 		switch (cellType) {
 		case NUMERIC:
 			visitor.visitCellValueNumeric(column, cell, cell.getNumericCellValue());
@@ -73,7 +73,7 @@ public class PoiExcelCellValueVisitor {
 	}
 
 	protected void visitCellValueBlank(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
-		assert cell.getCellTypeEnum() == CellType.BLANK;
+		assert cell.getCellType() == CellType.BLANK;
 
 		Column column = bean.getColumn();
 
@@ -109,7 +109,7 @@ public class PoiExcelCellValueVisitor {
 	}
 
 	protected void visitCellValueFormula(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
-		assert cell.getCellTypeEnum() == CellType.FORMULA;
+		assert cell.getCellType() == CellType.FORMULA;
 
 		FormulaHandling handling = bean.getFormulaHandling();
 		switch (handling) {
@@ -125,7 +125,7 @@ public class PoiExcelCellValueVisitor {
 	protected void visitCellValueFormulaCashedValue(PoiExcelColumnBean bean, Cell cell, CellVisitor visitor) {
 		Column column = bean.getColumn();
 
-		CellType cellType = cell.getCachedFormulaResultTypeEnum();
+		CellType cellType = cell.getCachedFormulaResultType();
 		switch (cellType) {
 		case NUMERIC:
 			visitor.visitCellValueNumeric(column, cell, cell.getNumericCellValue());
@@ -205,7 +205,7 @@ public class PoiExcelCellValueVisitor {
 			throw new RuntimeException(MessageFormat.format("evaluate error. formula={0}", cell.getCellFormula()), e);
 		}
 
-		CellType cellType = cellValue.getCellTypeEnum();
+		CellType cellType = cellValue.getCellType();
 		switch (cellType) {
 		case NUMERIC:
 			visitor.visitCellValueNumeric(column, cellValue, cellValue.getNumberValue());

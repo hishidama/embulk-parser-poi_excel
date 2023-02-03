@@ -147,13 +147,13 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			visitCellComment(bean, cell, visitor);
 			return;
 		case CELL_TYPE:
-			visitCellType(bean, cell, cell.getCellTypeEnum(), visitor);
+			visitCellType(bean, cell, cell.getCellType(), visitor);
 			return;
 		case CELL_CACHED_TYPE:
-			if (cell.getCellTypeEnum() == CellType.FORMULA) {
-				visitCellType(bean, cell, cell.getCachedFormulaResultTypeEnum(), visitor);
+			if (cell.getCellType() == CellType.FORMULA) {
+				visitCellType(bean, cell, cell.getCachedFormulaResultType(), visitor);
 			} else {
-				visitCellType(bean, cell, cell.getCellTypeEnum(), visitor);
+				visitCellType(bean, cell, cell.getCellType(), visitor);
 			}
 			return;
 		default:

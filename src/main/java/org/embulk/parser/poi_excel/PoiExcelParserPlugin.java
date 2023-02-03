@@ -196,7 +196,7 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 				Workbook workbook;
 				try {
 					workbook = WorkbookFactory.create(is);
-				} catch (IOException | EncryptedDocumentException | InvalidFormatException e) {
+				} catch (IOException | EncryptedDocumentException e) {
 					throw new RuntimeException(e);
 				}
 
