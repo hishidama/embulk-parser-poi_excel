@@ -60,7 +60,12 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		visitCell0(column, factory.getTimestampCellVisitor());
 	}
 
-	protected final void visitCell0(Column column, CellVisitor visitor) {
+	@Override
+	public final void jsonColumn(Column column) {
+		visitCell0(column, factory.getStringCellVisitor());
+	}
+
+		protected final void visitCell0(Column column, CellVisitor visitor) {
 		if (log.isTraceEnabled()) {
 			log.trace("{} start", column);
 		}

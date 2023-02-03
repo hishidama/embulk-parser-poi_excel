@@ -169,8 +169,6 @@ public class EmbulkPluginTester implements Closeable {
 
 	@Override
 	public void close() {
-		if (embulk != null) {
-			embulk.destroy();
-		}
+		return;
 	}
 }

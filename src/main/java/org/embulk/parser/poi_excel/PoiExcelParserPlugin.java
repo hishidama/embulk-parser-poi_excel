@@ -36,7 +36,6 @@ import org.embulk.spi.util.FileInputInputStream;
 import org.slf4j.Logger;
 
 import com.google.common.base.Optional;
-import com.ibm.icu.text.MessageFormat;
 
 public class PoiExcelParserPlugin implements ParserPlugin {
 	private final Logger log = Exec.getLogger(getClass());
@@ -268,7 +267,7 @@ public class PoiExcelParserPlugin implements ParserPlugin {
 						log.info("ignore: not found sheet={}", sheetName);
 						continue;
 					} else {
-						throw new RuntimeException(MessageFormat.format("not found sheet={0}", sheetName));
+						throw new RuntimeException(String.format("not found sheet=%s", sheetName));
 					}
 				}
 
