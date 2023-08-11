@@ -7,6 +7,7 @@ This plugin uses Apache POI.
 
 * **Plugin type**: parser
 * **Guess supported**: no
+* Embulk 0.9 or earlier (refer to https://github.com/hishidama/embulk-parser-excel-poi for 0.10 and later)
 
 
 ## Example
