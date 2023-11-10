@@ -157,6 +157,15 @@ public class EmbulkTestOutputPlugin implements OutputPlugin {
 								}
 								record.set(column.getName(), reader.getBoolean(column));
 							}
+
+							@Override
+							public void jsonColumn(Column column) {
+								if (reader.isNull(column)) {
+									record.set(column.getName(), null);
+									return;
+								}
+								record.set(column.getName(), reader.getString(column));
+							}
 						});
 					}
 					result.add(record);

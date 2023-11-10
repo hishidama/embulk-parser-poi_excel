@@ -60,7 +60,12 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 		visitCell0(column, factory.getTimestampCellVisitor());
 	}
 
-	protected final void visitCell0(Column column, CellVisitor visitor) {
+	@Override
+	public final void jsonColumn(Column column) {
+		visitCell0(column, factory.getStringCellVisitor());
+	}
+
+		protected final void visitCell0(Column column, CellVisitor visitor) {
 		if (log.isTraceEnabled()) {
 			log.trace("{} start", column);
 		}
@@ -142,13 +147,13 @@ public class PoiExcelColumnVisitor implements ColumnVisitor {
 			visitCellComment(bean, cell, visitor);
 			return;
 		case CELL_TYPE:
-			visitCellType(bean, cell, cell.getCellTypeEnum(), visitor);
+			visitCellType(bean, cell, cell.getCellType(), visitor);
 			return;
 		case CELL_CACHED_TYPE:
-			if (cell.getCellTypeEnum() == CellType.FORMULA) {
-				visitCellType(bean, cell, cell.getCachedFormulaResultTypeEnum(), visitor);
+			if (cell.getCellType() == CellType.FORMULA) {
+				visitCellType(bean, cell, cell.getCachedFormulaResultType(), visitor);
 			} else {
-				visitCellType(bean, cell, cell.getCellTypeEnum(), visitor);
+				visitCellType(bean, cell, cell.getCellType(), visitor);
 			}
 			return;
 		default:
